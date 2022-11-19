@@ -38,6 +38,7 @@ class MachineInfo extends BaseExtension {
 
     onToolbarCreated() {
         this._barChartPanel = new MachinesOverviewPanel(this.viewer, this.viewer.container, 'machine-list-panel', 'Machines Overview');
+
         // this._barChartPanel2 = new MachineInfoPanel2(this, 'machine-info-panel2', 'Machines', { x: 500, y: 10 });
 
         this._barChartButton = this.createToolbarButton('machine-info-button', 'https://img.icons8.com/external-nawicon-glyph-nawicon/512/external-excavator-construction-nawicon-glyph-nawicon.png', 'Show Machines Information');
@@ -76,6 +77,60 @@ class MachineInfo extends BaseExtension {
         }
         if (this._ExcavatorChartPanel && this._ExcavatorChartPanel.isVisible()) {
             // this._PileDriverChartPanel.setModel(model);
+        }
+
+        //for updating chart
+        const selectElement = this._PileDriverChartPanel.container.querySelector('select.props');
+        selectElement.onchange = (event) => {
+            const value = event.target.value;
+
+            switch (value) {
+                case 'Power':
+                    console.log('power maaand'); //will update graph with avg. max, min, engine power data
+                    this._PileDriverChartPanel.chart.data.datasets[0].data = [300, 200, 500, 600, 400, 100]; //CO2
+                    this._PileDriverChartPanel.chart.data.datasets[0].label = 'Avg. Power' //CO2
+                   this._PileDriverChartPanel.chart.data.datasets[1].label = 'Min. Power' 
+                   this._PileDriverChartPanel.chart.data.datasets[1].data = [200, 100, 400, 400, 500, 100];
+                   this._PileDriverChartPanel.chart.data.datasets[2].label = 'Max. Power' 
+                    this._PileDriverChartPanel.chart.data.datasets[2].data = [400, 300, 600, 800, 700, 300]; 
+                  this._PileDriverChartPanel.chart.update();
+                    
+                    break;
+                    case 'Emissions':
+                        console.log('Emissions maaand');//will update graph with CO2, PM and NO2 emissions
+                        this._PileDriverChartPanel.chart.data.datasets[0].data = [30,50,60,40,20,10]; //CO2
+                        this._PileDriverChartPanel.chart.data.datasets[0].label = 'CO2' //CO2
+                        this._PileDriverChartPanel.chart.data.datasets[1].label = 'NO2' 
+                        this._PileDriverChartPanel.chart.data.datasets[1].data = [20,40,60,70,80,20];
+                        this._PileDriverChartPanel.chart.data.datasets[2].label = 'PM' 
+                        this._PileDriverChartPanel.chart.data.datasets[2].data = [10,30,40,20,40,30]; 
+                        this._PileDriverChartPanel.chart.update();
+                    break;
+                case 'Fuel':
+                    this._PileDriverChartPanel.chart.data.datasets[0].data = [20,30,50,80,70,40]; //CO2
+                    this._PileDriverChartPanel.chart.data.datasets[0].label = 'Fuel' //CO2
+                    this._PileDriverChartPanel.chart.data.datasets[1].label = '' 
+                    this._PileDriverChartPanel.chart.data.datasets[1].data = [];
+
+                    this._PileDriverChartPanel.chart.data.datasets[2].label = '' 
+                    this._PileDriverChartPanel.chart.data.datasets[2].data = []; 
+
+                    this._PileDriverChartPanel.chart.update();
+                    console.log('Fuel maaand');
+                    break;
+                case 'Speeds':
+                    this._PileDriverChartPanel.chart.data.datasets[0].data = [20,30,50,80,70,40];
+                    this._PileDriverChartPanel.chart.data.datasets[0].label = 'Drilling speed' 
+                    this._PileDriverChartPanel.chart.data.datasets[1].label = 'Drill rotation speed' 
+                    this._PileDriverChartPanel.chart.data.datasets[1].data = [30,40,50,30,20,10];
+                    this._PileDriverChartPanel.chart.data.datasets[2].label = 'Driving speed' 
+                    this._PileDriverChartPanel.chart.data.datasets[2].data = [0,0,0,0,0,0]; 
+                    this._PileDriverChartPanel.chart.update();
+                    console.log('Speeds maaand');
+                    break;
+                default:
+                    break;
+            }
         }
 
     }
@@ -149,6 +204,7 @@ class MachinesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
         this._areLinesShowing = false;
         this.container.style.height = "350px";
         this.container.style.width = "900px";
+        
         //  this.scrollContainer.style.width = "auto";
         // this.scrollContainer.style.height = "auto";
         // this.scrollContainer.style.resize = "auto";
@@ -224,6 +280,10 @@ class MachinesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
             secondRowMachineList.querySelector('#data14').innerText = '7.89'
             secondRowMachineList.querySelector('#data15').innerText = 'Excessive idling' //function that if avg hours/CO2 per hour/fuel exceeds desired amount it says high hours/CO2 emissions/high fuel consumption
             secondRowMachineList.querySelector('#data15').style.color = 'red'
+
+            secondRowMachineList.querySelector('#data1').addEventListener('click', () => {
+                this.viewer.select(10677, Autodesk.Viewing.SelectionMode.REGULAR)
+            })
         
           const thirdRowMachineList = document.createElement('tr');
           machineList.appendChild(thirdRowMachineList)
@@ -252,6 +312,10 @@ class MachinesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
             thirdRowMachineList.querySelector('#data15').innerText = 'Excessive CO2 ' //function that if avg hours/CO2 per hour/fuel exceeds desired amount it says high hours/CO2 emissions/high fuel consumption
             //if function that depending on status color writes in red
             thirdRowMachineList.querySelector('#data15').style.color = 'red'
+           
+            thirdRowMachineList.querySelector('#data1').addEventListener('click', () => {
+                this.viewer.select(10740, Autodesk.Viewing.SelectionMode.REGULAR)
+            })
             
             //Text 
             const h1 = document.createElement('h1');
@@ -392,10 +456,10 @@ class PileDriverDataPanel extends Autodesk.Viewing.UI.DockingPanel {
         this.content.innerHTML = `
       <div class="props-container" style="position: relative; height: 25px; padding: 0.5em;">
         <select class="props">
-            <option value="CO2">CO2</option>
-            <option value="Fuel">Fuel</option>
-            <option value="NOx">NOx</option>
-            <option value="PM">PM</option>
+            <option value="Power">Engine Power</option>
+            <option value="Emissions">Emissions</option>
+            <option value="Fuel">Fuel Consumption</option>
+            <option value="Speeds">Speeds</option>
         </select>
         </div>
         <div class="chart-container" style="position: relative; height: 325px; padding: 0.5em;">
@@ -403,50 +467,35 @@ class PileDriverDataPanel extends Autodesk.Viewing.UI.DockingPanel {
         </div>
         `;
         
-        const selectElement = this.content.querySelector('select.props');
-        selectElement.onchange = this.updateChart;
 
 
-        this.select = selectElement;
         this.canvas = this.content.querySelector('canvas.chart');
         this.container.appendChild(this.content);
     }
     
-    updateChart(event) {
-        const value = event.target.value;
-
-        switch (value) {
-            case 'CO2':
-                console.log('co2 maaand');
-                break;
-            case 'NOx':
-                console.log('NOx maaand');
-                break;
-            case 'Fuel':
-                console.log('Fuel maaand');
-                break;
-            case 'PM':
-                console.log('PM maaand');
-                break;
-            default:
-                break;
-        }
-    }
     
-    async createChart() {
+     createChart() {
         return new Chart(this.canvas.getContext('2d'), {
             type: 'line',
             data: {
-                labels: ['06/10/22 14:50','06/10/22 14:51','06/10/22 14:52','06/10/22 14:53','06/10/22 14:54','06/10/22 14:55'],
+                labels: ['06/10/22 14:50','06/10/22 14:51','06/10/22 14:52','06/10/22 14:53','06/10/22 14:54','06/10/22 14:55'], //get time stamps
                 datasets: [{ 
-                    data: [0.5, 0.6, 0.3, 0.4, 0.2, 0.1],
-                    label: "Total Emissions",
+                    data: [300, 200, 500, 600, 400, 100],
+                    label: "Avg. Power ", //Power over time
                     borderColor: "#3e95cd",
+                    backgroundColor: "#3e95cd",
                     fill: false
                 }, { 
-                    data: [0.7, 0.9, 0.2, 0.3, 0.7, 0.8],
-                    label: "Fuel Consumption",
+                    data: [200, 100, 400, 400, 500, 100],
+                    label: "Min. Power",
                     borderColor: "#8e5ea2",
+                    backgroundColor: "#8e5ea2",
+                    fill: false
+                }, { 
+                    data: [400, 300, 600, 800, 700, 300],
+                    label: "Max. Power",
+                    borderColor: "#FFA500",
+                    backgroundColor: "#FFA500",
                     fill: false
                 }
             ]
@@ -458,7 +507,59 @@ class PileDriverDataPanel extends Autodesk.Viewing.UI.DockingPanel {
             }
         }
     });
+    
 }
+//  updateChart(event) {
+
+//     const value = event.target.value;
+
+//     switch (value) {
+//         case 'Power':
+//             console.log('power maaand'); //will update graph with avg. max, min, engine power data
+//             // Example of code to update chart - replace with CO2, NO2, PM
+//             // newchartCO2Data = Emissiondata[i] //CO2 DATA
+//             // newchartNO2Data = WorkingTime[i] //CO2 DATA
+//             // newchartPMData = Emissiondata[i] //CO2 DATA
+//             // newchartPowerData = Emissiondata[i] //CO2 DATA
+//             // newChartDrillingTime = WorkingTime[i] //neds to be drilling time
+//             // newChartDrillingSpeed = WorkingTime[i] //neds to be drilling time
+//             // console.log('chartdata', newchartCO2Data);
+//             // // console.log(this._barChartPanel);
+//             // this._barChartPanel.chart.data.labels[0] = newChartLabel;
+//             this.chart.data.datasets[0].data = [300, 200, 500, 600, 400, 100]; //CO2
+//             this.chart.data.datasets[0].label = 'Avg. Power' //CO2
+//            this.chart.data.datasets[1].label = 'Min. Power' 
+//            this.chart.data.datasets[1].data = [200, 100, 400, 400, 500, 100];
+//            this.chart.data.datasets[2].label = 'Max. Power' 
+//             this.chart.data.datasets[2].data = [400, 300, 600, 800, 700, 300]; 
+//             // this._barChartPanel.chart.data.datasets[1].data[0] = newchartNO2Data; //NO2
+//             // this._barChartPanel.chart.data.datasets[2].data[0] = newchartPMData; //PM
+//             // this._barChartPanel.chart.data.datasets[3].data[0] = newchartPowerData; //Avg. Power
+//             // this._barChartPanel.chart.data.datasets[4].data[0] = newChartDrillingTime; //drillign time
+//             // this._barChartPanel.chart.data.datasets[5].data[0] = newChartDrillingSpeed; //avg drillign speed
+//           this.chart.update();
+            
+//             break;
+//             case 'Emissions':
+//                 console.log('Emissions maaand');//will update graph with CO2, PM and NO2 emissions
+//                 this.chart.data.datasets[0].data = [30,50,60,40,20,10]; //CO2
+//                 this.chart.data.datasets[0].label = 'CO2' //CO2
+//                 this.chart.data.datasets[1].label = 'NO2' 
+//                 this.chart.data.datasets[1].data = [20,40,60,70,80,20];
+//                 this.chart.data.datasets[2].label = 'PM' 
+//                 this.chart.data.datasets[2].data = [10,30,40,20,40,30]; 
+//                 this.chart.update();
+//             break;
+//         case 'Fuel':
+//             console.log('Fuel maaand');
+//             break;
+//         case 'Speeds':
+//             console.log('Speeds maaand');
+//             break;
+//         default:
+//             break;
+//     }
+// }
 }
 
 //Creates excavator panel

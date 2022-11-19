@@ -25,12 +25,16 @@ for (let i = 1; i < ListPilesDbIds.length + 1; i++) {
 
 //necessary for the charts 
 const dataForallPiles = [];
-const Emissiondata = [];
+const Emissiondata = []; //this is CO2
 const WorkingTime = [];
 
-let newchartData = [];
 let newChartLabel = [];
-let newChartWorkingTime = [];
+let newchartCO2Data = [];
+let newchartNO2Data = [];
+let newchartPMData = [];
+let newchartPowerData = [];
+let newChartDrillingTime = [];
+let newChartDrillingSpeed = [];
 
 // const PilesNames = ['Pile 1', 'Pile 2', 'Pile 3', 'Pile 4'] //for piles charts - will use the above
 
@@ -48,7 +52,7 @@ setTimeout(() => {
 }, 10000) //not sure if this is needed here because there is another one down there when creating the panels
 
 
-class DatachartPilenew extends BaseExtension {
+class ActivitiesOverview extends BaseExtension {
     constructor(viewer, options) {
         super(viewer, options);
         // this._barChartButton = null;
@@ -86,12 +90,12 @@ class DatachartPilenew extends BaseExtension {
     }
 
     onToolbarCreated() {
-        this._barChartPanel = new DatachartPanel(this, 'datachart-panel-new', 'Datachart Pile', { x: 10, y: 10, chartType: 'bar' });
+        this._barChartPanel = new DatachartPanel(this, 'datachart-panel-new', 'Piles Data', { x: 10, y: 10, chartType: 'bar' });
         this._barChartButton = this.createToolbarButton('activity-overview-button', 'https://img.icons8.com/ios/344/combo-chart--v1.png', 'Show Activity Overview)');
         setTimeout(() => { //needs the timeout else it creates panel as soon as creates the toolbar. Unless changes
             this._ActivitiesOverviewPanel = new ActivitiesOverviewPanel(this.viewer, this.viewer.container, 'ActivitiesOverviewPanel', 'Show Activities Overview');
             this._PileslistPanel = new PilesListPanel(this.viewer, this.viewer.container, 'listPilesPanel', 'Piles list');
-            this._HeatmapSwitchPanel = new HeatmapSwitchPanel(this.viewer, this.viewer.container, 'heatmapPanel', 'Heatmap Piles');
+            this._HeatmapSwitchPanel = new HeatmapSwitchPanel(this, 'piles-heatmap-panel', 'Heatmap Piles', { x: 10, y: 10 });
         }, 10000)
         this._barChartButton.onClick = () => {
 
@@ -149,14 +153,22 @@ class DatachartPilenew extends BaseExtension {
         for (let i = 0; i < ListPilesDbIds.length; i++) {
             if (dbids[0] === ListPilesDbIds[i]) {
                 // console.log('emissiondatapile', Emissiondata[i])
-                newchartData = Emissiondata[i]
-                newChartLabel = PilesNames[i]
-                newChartWorkingTime = WorkingTime[i]
-                console.log('chartdata', newchartData);
+                newChartLabel = PilesNames[i] //needs to get it from the list that says D1180-1
+                newchartCO2Data = Emissiondata[i] //CO2 DATA
+                newchartNO2Data = WorkingTime[i] //CO2 DATA
+                newchartPMData = Emissiondata[i] //CO2 DATA
+                newchartPowerData = Emissiondata[i] //CO2 DATA
+                newChartDrillingTime = WorkingTime[i] //neds to be drilling time
+                newChartDrillingSpeed = WorkingTime[i] //neds to be drilling time
+                console.log('chartdata', newchartCO2Data);
                 // console.log(this._barChartPanel);
-                this._barChartPanel.chart.data.datasets[0].data[0] = newchartData;
-                this._barChartPanel.chart.data.datasets[0].label = newChartLabel;
-                this._barChartPanel.chart.data.datasets[1].data[0] = newChartWorkingTime;
+                this._barChartPanel.chart.data.labels[0] = newChartLabel;
+                this._barChartPanel.chart.data.datasets[0].data[0] = newchartCO2Data; //CO2
+                this._barChartPanel.chart.data.datasets[1].data[0] = newchartNO2Data; //NO2
+                this._barChartPanel.chart.data.datasets[2].data[0] = newchartPMData; //PM
+                this._barChartPanel.chart.data.datasets[3].data[0] = newchartPowerData; //Avg. Power
+                this._barChartPanel.chart.data.datasets[4].data[0] = newChartDrillingTime; //drillign time
+                this._barChartPanel.chart.data.datasets[5].data[0] = newChartDrillingSpeed; //avg drillign speed
                 this._barChartPanel.chart.update();
                 // this._barChartPanel.setVisible(!this._barChartPanel.isVisible());
             }
@@ -295,7 +307,7 @@ class DatachartPanel extends Autodesk.Viewing.UI.DockingPanel {
         this.container.style.left = (options.x || 0) + 'px';
         this.container.style.top = (options.y || 0) + 'px';
         this.container.style.width = (options.width || 500) + 'px';
-        this.container.style.height = (options.height || 400) + 'px';
+        this.container.style.height = (options.height || 300) + 'px';
         this.container.style.resize = 'none';
         this.chartType = options.chartType || 'bar'; // See https://www.chartjs.org/docs/latest for all the supported types of charts
         this.chart = this.createChart();
@@ -305,6 +317,7 @@ class DatachartPanel extends Autodesk.Viewing.UI.DockingPanel {
     initialize() {
         this.title = this.createTitleBar(this.titleLabel || this.container.id);
         this.closer = this.createCloseButton();
+        // this.footer = this.createFooter(); //to resize container
         this.initializeMoveHandlers(this.title);
         this.initializeCloseHandler(this.closer);
         this.container.appendChild(this.title);
@@ -313,68 +326,103 @@ class DatachartPanel extends Autodesk.Viewing.UI.DockingPanel {
         this.content.style.height = '350px';
         this.content.style.backgroundColor = 'white';
         this.content.innerHTML = `
-        <div class="props-container" style="position: relative; height: 25px; padding: 0.5em;">
-        <select class="props">
-            <option value="CO2">CO2</option>
-            <option value="Fuel">Fuel</option>
-            <option value="NOx">NOx</option>
-            <option value="PM">PM</option>
-        </select>
-        </div>
-        <div class="chart-container" style="position: relative; height: 325px; padding: 0.5em;">
+       
+        <div class="chart-container" style="position: relative; height: 300px; padding: 0.5em;">
         <canvas class="chart"></canvas>
         </div>
         `;
+        //old one with select props
+        // this.content.innerHTML = `
+        // <div class="props-container" style="position: relative; height: 25px; padding: 0.5em;">
+        // <select class="props">
+        //     <option value="CO2">CO2</option>
+        //     <option value="Fuel">Fuel</option>
+        //     <option value="NOx">NOx</option>
+        //     <option value="PM">PM</option>
+        // </select>
+        // </div>
+        // <div class="chart-container" style="position: relative; height: 325px; padding: 0.5em;">
+        // <canvas class="chart"></canvas>
+        // </div>
+        // `;
 
-        const selectElement = this.content.querySelector('select.props');
-        selectElement.onchange = this.updateChart;
+        // const selectElement = this.content.querySelector('select.props');
+        // selectElement.onchange = this.updateChart;
+        // this.select = selectElement;
 
 
-        this.select = selectElement;
         this.canvas = this.content.querySelector('canvas.chart');
         this.container.appendChild(this.content);
     }
 
-    updateChart(event) {
-        const value = event.target.value;
+    // updateChart(event) {
+    //     const value = event.target.value;
 
-        switch (value) {
-            case 'CO2':
-                console.log('co2 maaand');
-                break;
-            case 'NOx':
-                console.log('NOx maaand');
-                break;
-            case 'Fuel':
-                console.log('Fuel maaand');
-                break;
-            case 'PM':
-                console.log('PM maaand');
-                break;
-            default:
-                break;
-        }
-    }
+    //     switch (value) {
+    //         case 'CO2':
+    //             console.log('co2 maaand');
+    //             break;
+    //         case 'NOx':
+    //             console.log('NOx maaand');
+    //             break;
+    //         case 'Fuel':
+    //             console.log('Fuel maaand');
+    //             break;
+    //         case 'PM':
+    //             console.log('PM maaand');
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    // }
 
     createChart() {
         return new Chart(this.canvas.getContext('2d'), {
             type: 'bar',
             data: {
-                labels: ['Emissions Total'], //or PilesNames[0]
+                labels: ['Pile name'], //or PilesNames[0]
                 datasets: [{
                     data: [Emissiondata[0]],
-                    label: 'Emissions Total',
-                    borderColor: "#3e95cd",
+                    label: 'CO2 Emissions',
+                    borderColor: "#FF0000",
+                    backgroundColor: ["#FF0000"],
+                    fill: false
+                },
+                {
+                    data: [WorkingTime[0]],
+                    label: "NO2 Emissions",
+                    borderColor: "#FFA500",
+                    backgroundColor: ["#FFA500"],
+                    fill: false
+                },
+                {
+                    data: [WorkingTime[0]],
+                    label: "PM Emissions",
+                    borderColor: "#FFFF00",
+                    backgroundColor: ["#FFFF00"],
+                    fill: false
+                },
+                {
+                    data: [WorkingTime[0]],
+                    label: "Avg. Power",
+                    borderColor: "##008000",
+                    backgroundColor: ["#008000"],
+                    fill: false
+                },
+                {
+                    data: [WorkingTime[0]],
+                    label: "Drilling time",
+                    borderColor: "#8e5ea2",
                     backgroundColor: ["#3e95cd"],
                     fill: false
                 },
                 {
                     data: [WorkingTime[0]],
-                    label: "Working time",
-                    borderColor: "#8e5ea2",
-                    backgroundColor: ["#3e95cd"],
+                    label: "Avg. Drilling Speed",
+                    borderColor: "#800080",
+                    backgroundColor: ["#800080"],
                     fill: false
-                }
+                },
 
                 ]
             },
@@ -421,7 +469,7 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
         const firstRow = document.createElement('tr');
         table.appendChild(firstRow)
 
-        for (let index = 1; index < 9; index++) {
+        for (let index = 1; index < 10; index++) {
             const RowTitles = document.createElement('td');
             firstRow.appendChild(RowTitles)
             RowTitles.id = 'Title' + [index]
@@ -432,10 +480,12 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
         firstRow.querySelector('#Title2').innerText = 'Top Level'
         firstRow.querySelector('#Title3').innerText = 'Depth'
         firstRow.querySelector('#Title4').innerText = 'D(mm)'
-        firstRow.querySelector('#Title5').innerText = 'Execution Started'
-        firstRow.querySelector('#Title6').innerText = 'Execution Time'
-        firstRow.querySelector('#Title7').innerText = 'Embedded CO2 (kg?)'
-        firstRow.querySelector('#Title8').innerText = 'Machine CO2 (kg?)'
+        firstRow.querySelector('#Title5').innerText = 'Execution Status' //Finished / in execution /not started
+        firstRow.querySelector('#Title6').innerText = 'Avg. Execution Time' //get length of array and divide by number of piles the machine can reach
+        firstRow.querySelector('#Title7').innerText = 'Embedded CO2 (kg)' //Fixed value
+        firstRow.querySelector('#Title8').innerText = 'Machine CO2 (kg?)' //get CO2 sum of array and divide by number of piles the machine can reach
+        firstRow.querySelector('#Title9').innerText = '' //get CO2 sum of array and divide by number of piles the machine can reach
+
 
         //add a button for marking pile as completed, then on appear objects show only completed, on progress change color,
         //or completed show as green
@@ -458,21 +508,28 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
             const execStatus = document.createElement('td');
             function execStarted() { //to return yes or no for execution started
                 if (WorkingTime[index] === 0) {
-                    return 'no'
+                    return 'not started'
                 }
-                else { return 'yes' }
+                else { return 'in execution' }
             }
             execStatus.innerText = execStarted()
 
             const execTime = document.createElement('td');
             execTime.innerText = `${WorkingTime[index]}`  //make it so that if this is bigger than a value color in red
-            if (WorkingTime[index] > 50) {
+            if (WorkingTime[index] == 0) {
+                execTime.innerText = '-'
+            } else if (WorkingTime[index] > 50) {
                 execTime.style.color = 'red'
             }
             const embCO2 = document.createElement('td');
             embCO2.innerText = 'TBD'
             const machCO2 = document.createElement('td');
             machCO2.innerText = `${Emissiondata[index]}`
+            const ButtonFinishedPile = document.createElement('button')
+            ButtonFinishedPile.textContent = 'Mark as Finished'
+            ButtonFinishedPile.style.borderRadius = '4px'
+            ButtonFinishedPile.style.cursor = 'pointer'
+
             if (Emissiondata[index] > 50) {  //make it so that if this is bigger than a value color in red
                 machCO2.style.color = 'red'
             }
@@ -483,10 +540,16 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
             allRows.appendChild(execTime)
             allRows.appendChild(embCO2)
             allRows.appendChild(machCO2)
+            allRows.appendChild(ButtonFinishedPile)
             allRows.style.textAlign = 'center'
             pileName.addEventListener('click', () => {
                 this.viewer.select(ListPilesDbIds[index], Autodesk.Viewing.SelectionMode.REGULAR)
 
+            })
+            ButtonFinishedPile.addEventListener('click', () => {
+                execStatus.innerText = 'Finished'
+                ButtonFinishedPile.textContent = '-' //can change later to change text content to mark as unfinished
+                ButtonFinishedPile.disabled = 'true'
             })
 
             // th.style.pointerEvents = 'fill'
@@ -498,36 +561,115 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
 
     }
 }
+//can be deleted as property panel
+// class HeatmapSwitchPanel extends Autodesk.Viewing.UI.PropertyPanel {
+//     constructor(viewer, container, id, title, options) {
+//         super(container, id, title, options);
+//         this.viewer = viewer;
+//         this.container.style.height = "100px";
+//         this.container.style.width = "100px";
+//         //  this.scrollContainer.style.width = "auto";
+//         // this.scrollContainer.style.height = "auto";
+//         // this.scrollContainer.style.resize = "auto";
 
-class HeatmapSwitchPanel extends Autodesk.Viewing.UI.PropertyPanel {
-    constructor(viewer, container, id, title, options) {
-        super(container, id, title, options);
-        this.viewer = viewer;
-        this.container.style.height = "100px";
-        this.container.style.width = "100px";
-        //  this.scrollContainer.style.width = "auto";
-        // this.scrollContainer.style.height = "auto";
-        // this.scrollContainer.style.resize = "auto";
 
+//         this.content = document.createElement('div');
+//         const placeholder = document.createElement('h1');
+//         placeholder.innerText = 'Heatmap options will go here'
+//         placeholder.style.fontSize = '15px'
 
-        this.content = document.createElement('div');
-        const placeholder = document.createElement('h1');
-        placeholder.innerText = 'Heatmap options will go here'
-        placeholder.style.fontSize = '15px'
+//         this.content.appendChild(placeholder)
 
-        this.content.appendChild(placeholder)
+//         this.scrollContainer.appendChild(this.content); //content needs to go inside scroll container
 
-        this.scrollContainer.appendChild(this.content); //content needs to go inside scroll container
+//     }
 
-    }
+    class HeatmapSwitchPanel extends Autodesk.Viewing.UI.DockingPanel {
+        constructor(extension, id, title, options) {
+            super(extension.viewer.container, id, title, options);
+            this.extension = extension;
+            this.container.style.left = (options.x || 0) + 'px';
+            this.container.style.top = (options.y || 0) + 'px';
+            this.container.style.width = (options.width || 300) + 'px';
+            this.container.style.height = (options.height || 200) + 'px';
+            this.container.style.resize = 'none';
+            // this.chartType = options.chartType || 'bar'; // See https://www.chartjs.org/docs/latest for all the supported types of charts
+            // this.chart = this.createChart();
+            // this.newchart = this.updateChart();
+        }
+    
+        initialize() {
+            this.title = this.createTitleBar(this.titleLabel || this.container.id);
+            this.closer = this.createCloseButton();
+            // this.footer = this.createFooter(); //to resize container
+            this.initializeMoveHandlers(this.title);
+            this.initializeCloseHandler(this.closer);
+            this.container.appendChild(this.title);
+            this.container.appendChild(this.closer);
+            this.content = document.createElement('div');
+            // this.content.style.height = '50px';
+            this.content.style.backgroundColor = 'white';
+            //delete the select props for this one 
+            
+            this.content.innerHTML = `
+            <h1 style="color:red;"> Heatmap Options go here </h1>
+            <div class="props-container" style="position: relative; height: 25px; padding: 0.5em;">
+            <select class="props">
+                <option value="CO2">CO2</option>
+                <option value="Fuel">Fuel</option>
+                <option value="NOx">NOx</option>
+                <option value="PM">PM</option>
+            </select>
+            </div>
+            <div class="chart-container" style="position: relative; height: 325px; padding: 0.5em;">
+            <canvas class="chart"></canvas>
+            </div>
+            `;
+    
+            const selectElement = this.content.querySelector('select.props');
+            selectElement.onchange = this.updateChart;
+    
+    
+            this.select = selectElement;
+            this.canvas = this.content.querySelector('canvas.chart');
+            this.container.appendChild(this.content);
+        }
+    
+    //     updateHeatmap(event) {
+    //         // const value = event.target.value;
+    
+    //         // switch (value) {
+    //         //     case 'CO2':
+    //         //         console.log('co2 maaand');
+    //         //         break;
+    //         //     case 'NOx':
+    //         //         console.log('NOx maaand');
+    //         //         break;
+    //         //     case 'Fuel':
+    //         //         console.log('Fuel maaand');
+    //         //         break;
+    //         //     case 'PM':
+    //         //         console.log('PM maaand');
+    //         //         break;
+    //         //     default:
+    //         //         break;
+    //         // }
+    //     }
+    
+    //     createHeatmap() {
+            
+    // }
 }
 //Activity overview panel 
 class ActivitiesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
     constructor(viewer, container, id, title, options) {
         super(container, id, title, options);
         this.viewer = viewer;
-        this.container.style.height = "500px";
-        this.container.style.width = "300px";
+        this.container.style.height = "400px";
+        this.container.style.width = "700px";
+        // this.container.style.position = 'absolute'
+        // this.container.style.left = '20px';
+        // this.container.style.top = '20px';
         //  this.scrollContainer.style.width = "auto";
         // this.scrollContainer.style.height = "auto";
         // this.scrollContainer.style.resize = "auto";
@@ -537,158 +679,139 @@ class ActivitiesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
 
         const h1 = document.createElement('h1');
         h1.innerText = 'Pile drilling Overview'
-        h1.style.fontSize = '15px'
+        h1.style.fontSize = '20px'
         this.content.appendChild(h1)
 
-        const table = document.createElement('table');
-        table.style.border = '2px solid black'
-        table.style.borderCollapse = 'collapse'
-        table.style.width = '100%'
+        const h2 = document.createElement('h2');
+        h2.innerText = 'Description of activity, no. of piles etc'
+        h2.style.fontSize = '10px'
+        this.content.appendChild(h2)
+
+
 
 
         //table 1 pile drilling
-        const table1 = document.createElement('table');
-        table1.style.border = '2px solid black'
-        table1.style.borderCollapse = 'collapse'
-        table1.style.width = '60%'
+        const table1Drill = document.createElement('table');
+        table1Drill.style.border = '2px solid black'
+        table1Drill.style.borderCollapse = 'collapse'
+        table1Drill.style.maxWidth = '60%'
+
+
 
 
         const firstRow = document.createElement('tr');
-        firstRow.style.backgroundColor = 'grey'
-        table1.appendChild(firstRow)
+        // firstRow.style.backgroundColor = 'gainsboro'
+        firstRow.style.backgroundColor = 'LightGrey'
+        table1Drill.appendChild(firstRow)
 
-        for (let index = 1; index < 9; index++) {
+        for (let index = 1; index < 14; index++) {
             const RowTitles = document.createElement('td');
             firstRow.appendChild(RowTitles)
-            RowTitles.style.width = '10%'
+            RowTitles.style.minWidth = '20px'
+            RowTitles.style.padding = '0px 5px'
             RowTitles.id = 'Title' + [index]
             RowTitles.style.border = '2px solid black'
+            RowTitles.style.fontWeight = 'bold'
+            RowTitles.style.textAlign = 'center'
         }
 
 
         firstRow.querySelector('#Title1').innerText = 'Start date'
-        firstRow.querySelector('#Title2').innerText = 'Expected end date'
-        firstRow.querySelector('#Title3').innerText = 'Expected duration'
-        firstRow.querySelector('#Title4').innerText = 'Current duration'
-        firstRow.querySelector('#Title5').innerText = 'Expected cost'
-        firstRow.querySelector('#Title6').innerText = 'Current cost' //Sums fixed + machine cost by time working on piles
-        firstRow.querySelector('#Title7').innerText = 'No. piles executed/in execution' //maybe can split if I add drilling depth into the game
-        firstRow.querySelector('#Title8').innerText = 'No. piles not started'
+        firstRow.querySelector('#Title2').innerText = 'Expected duration (days)'
+        firstRow.querySelector('#Title3').innerText = 'Current duration (days)'
+        firstRow.querySelector('#Title4').innerText = 'Expected cost (DKK)'
+        firstRow.querySelector('#Title5').innerText = 'Current cost (DKK)' //Sums fixed + machine cost by time working on piles
+        firstRow.querySelector('#Title6').innerText = 'No. piles executed' //based on marking piles as finished
+        firstRow.querySelector('#Title7').innerText = 'No. piles to be exec.'
+        firstRow.querySelector('#Title8').innerText = 'Total operation time (h)'
+        firstRow.querySelector('#Title9').innerText = 'Avg. time per pile (h)'
+        firstRow.querySelector('#Title10').innerText = 'Avg. cost per pile (DKK)'
+        firstRow.querySelector('#Title11').innerText = 'Avg. CO2 emissions per pile (kg)'
+        firstRow.querySelector('#Title12').innerText = 'Total CO2 emissions (kg)'
+        firstRow.querySelector('#Title13').innerText = 'Status' //(ok/delayed/high emissions) //can it send automatic alert
 
 
         const SecondRow = document.createElement('tr');
-        table1.appendChild(SecondRow)
+        table1Drill.appendChild(SecondRow)
 
-        for (let index = 1; index < 9; index++) {
+        for (let index = 1; index < 14; index++) {
             const secondrowtitles = document.createElement('td');
             SecondRow.appendChild(secondrowtitles)
-            secondrowtitles.style.width = '10%'
+            // secondrowtitles.style.width = '10%'
+            secondrowtitles.style.minWidth = '20px'
+
             secondrowtitles.id = 'secondData' + [index]
             secondrowtitles.style.border = '2px solid black'
+            secondrowtitles.style.textAlign = 'center'
         }
 
 
-        SecondRow.querySelector('#secondData1').innerText = 'Start date'
-        SecondRow.querySelector('#secondData2').innerText = 'Expected end date'
-        SecondRow.querySelector('#secondData3').innerText = 'Expected duration'
-        SecondRow.querySelector('#secondData4').innerText = 'Current duration'
-        SecondRow.querySelector('#secondData5').innerText = 'Expected cost'
-        SecondRow.querySelector('#secondData6').innerText = 'Current cost' //Sums fixed + machine cost by time working on piles
-        SecondRow.querySelector('#secondData7').innerText = 'No. piles executed/in execution' //maybe can split if I add drilling depth into the game
-        SecondRow.querySelector('#secondData8').innerText = 'No. piles not started'
+        SecondRow.querySelector('#secondData1').innerText = '01-09-22'
+        SecondRow.querySelector('#secondData2').innerText = '60'
+        SecondRow.querySelector('#secondData3').innerText = '22'
+        SecondRow.querySelector('#secondData4').innerText = '60.000,00'
+        SecondRow.querySelector('#secondData5').innerText = '40.000,00'
+        SecondRow.querySelector('#secondData6').innerText = '20' //bring it from marks as executed
+        SecondRow.querySelector('#secondData7').innerText = '80'
+        SecondRow.querySelector('#secondData8').innerText = '100'
+        SecondRow.querySelector('#secondData9').innerText = '5'
+        SecondRow.querySelector('#secondData10').innerText = '2.000,00'
+        SecondRow.querySelector('#secondData11').innerText = '5'
+        SecondRow.querySelector('#secondData12').innerText = '100'
+        SecondRow.querySelector('#secondData13').innerText = 'Delayed' //(ok/delayed/high emissions) //can it send automatic alert
+        SecondRow.querySelector('#secondData13').style.color = 'red' //(ok/delayed/high emissions) //can it send automatic alert
 
-
-        const table2 = document.createElement('table');
-        table2.style.border = '2px solid black'
-        table2.style.borderCollapse = 'collapse'
-        table2.style.width = '60%'
-        table2.style.marginTop = '5px'
-
-
-        const Row = document.createElement('tr');
-        Row.style.backgroundColor = 'grey'
-        table2.appendChild(Row)
-        for (let index = 1; index < 9; index++) {
-            const RowData = document.createElement('td');
-            Row.appendChild(RowData)
-            RowData.style.width = '10%'
-            RowData.id = 'Titles' + [index]
-            RowData.style.border = '2px solid black'
-        }
-
-
-        Row.querySelector('#Titles1').innerText = 'Expected time and cost per pile' //fixed + machine
-        Row.querySelector('#Titles2').innerText = 'Current avg time and cost per pile'
-        Row.querySelector('#Titles3').innerText = 'Expected CO2 emission per pile' //Remember to add embedded
-        Row.querySelector('#Titles4').innerText = 'Current avg. CO2 emission per pile'
-        Row.querySelector('#Titles5').innerText = 'Current total CO2 emissions'
-        Row.querySelector('#Titles6').innerText = 'Status' //(ok/delayed/high emissions) //can it send automatic alert
-        Row.querySelector('#Titles7').innerText = 'Button' //(ok/delayed/high emissions) //Button for sending email 
-        Row.querySelector('#Titles8').innerText = 'Button' //(ok/delayed/high emissions) //Button for sending email 
-
-        const RowTwo = document.createElement('tr');
-        table2.appendChild(RowTwo)
-        for (let index = 1; index < 9; index++) {
-            const RowTwoData = document.createElement('td');
-            RowTwo.appendChild(RowTwoData)
-            RowTwoData.style.width = '10%'
-            RowTwoData.id = 'Titles' + [index]
-            RowTwoData.style.border = '2px solid black'
-        }
-
-
-        RowTwo.querySelector('#Titles1').innerText = 'Expected time and cost per pile' //fixed + machine
-        RowTwo.querySelector('#Titles2').innerText = 'Current avg time and cost per pile'
-        RowTwo.querySelector('#Titles3').innerText = 'Expected CO2 emission per pile' //Remember to add embedded
-        RowTwo.querySelector('#Titles4').innerText = 'Current avg. CO2 emission per pile'
-        RowTwo.querySelector('#Titles5').innerText = 'Current total CO2 emissions'
-        RowTwo.querySelector('#Titles6').innerText = 'Status' //(ok/delayed/high emissions) //can it send automatic alert
-        RowTwo.querySelector('#Titles7').innerText = 'Button' //(ok/delayed/high emissions) //Button for sending email 
-        RowTwo.querySelector('#Titles8').innerText = 'bUTTON'
 
         const tablebuttons = document.createElement('table');
+        tablebuttons.style.marginTop = '10px'
         const buttonRows = document.createElement('tr');
         tablebuttons.appendChild(buttonRows)
         const cell1 = document.createElement('td')
         const cell2 = document.createElement('td')
         const cell3 = document.createElement('td')
         const cell4 = document.createElement('td')
-        buttonRows.appendChild(cell1)
         buttonRows.appendChild(cell2)
         buttonRows.appendChild(cell3)
+        buttonRows.appendChild(cell1)
         buttonRows.appendChild(cell4)
-        const button1 = document.createElement('button')
         const button3 = document.createElement('button')
         const button2 = document.createElement('button')
+        const button1 = document.createElement('button')
         const button4 = document.createElement('button')
-        cell1.appendChild(button1)
         cell2.appendChild(button2)
         cell3.appendChild(button3)
+        cell1.appendChild(button1)
         cell4.appendChild(button4)
-        button1.innerHTML = '<a href="mailto:goes.lylian@gmail.com" style="text-decoration:none; color:red">Send email</a>'
-        button2.style.color = 'red'
+        button1.innerHTML = '<a href="mailto:goes.lylian@gmail.com" style="text-decoration:none; color:black">Send alert</a>'
         button1.style.borderRadius = '4px'
         button1.style.cursor = 'pointer'
+        // button1.onclick()
 
-        button2.textContent = 'Open simulation tab'
-        button3.textContent = 'See piles details'
+        button2.textContent = 'Simulate activity'
+        button2.style.borderRadius = '4px'
+        button2.style.cursor = 'pointer'
+        button3.textContent = "Piles details"
+        button3.style.borderRadius = '4px'
+        button3.style.cursor = 'pointer'
         button3.id = 'PilesDetailsButton'
+        button4.textContent = "Piles Heatmap"
+        button4.style.borderRadius = '4px'
+        button4.style.cursor = 'pointer'
         button4.id = 'PilesHeatmapButton'
-        button4.textContent = 'See piles heatmap'
 
 
-        this.content.appendChild(table1)
-        this.content.appendChild(table2)
+        this.content.appendChild(table1Drill)
         this.content.appendChild(tablebuttons)
 
 
-        //title for excavation overview
-        const h2 = document.createElement('h1');
-        h2.innerText = 'Excavation Overview'
-        h2.style.fontSize = '15px'
-        this.content.appendChild(h2)
+        //Excavation overview header
+        const h3 = document.createElement('h1');
+        h3.innerText = 'Excavation Overview'
+        h3.style.fontSize = '20px'
+        h3.style.marginTop = '20px'
+        this.content.appendChild(h3)
 
-        //table excavation overview
+        //excavation table
         const table1Exc = document.createElement('table');
         table1Exc.style.border = '2px solid black'
         table1Exc.style.borderCollapse = 'collapse'
@@ -696,10 +819,10 @@ class ActivitiesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
 
 
         const firstRowExc = document.createElement('tr');
-        firstRowExc.style.backgroundColor = 'grey'
+        firstRowExc.style.backgroundColor = 'gainsboro'
         table1Exc.appendChild(firstRowExc)
 
-        for (let index = 1; index < 9; index++) {
+        for (let index = 1; index < 14; index++) {
             const RowTitles = document.createElement('td');
             firstRowExc.appendChild(RowTitles)
             RowTitles.style.width = '10%'
@@ -721,7 +844,7 @@ class ActivitiesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
         const SecondRowExc = document.createElement('tr');
         table1Exc.appendChild(SecondRowExc)
 
-        for (let index = 1; index < 9; index++) {
+        for (let index = 1; index < 14; index++) {
             const secondrowtitles = document.createElement('td');
             SecondRowExc.appendChild(secondrowtitles)
             secondrowtitles.style.width = '10%'
@@ -747,47 +870,6 @@ class ActivitiesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
         table2Exc.style.marginTop = '5px'
 
 
-        const RowExc = document.createElement('tr');
-        RowExc.style.backgroundColor = 'grey'
-        table2Exc.appendChild(RowExc)
-        for (let index = 1; index < 9; index++) {
-            const RowData = document.createElement('td');
-            RowExc.appendChild(RowData)
-            RowData.style.width = '10%'
-            RowData.id = 'Titles' + [index]
-            RowData.style.border = '2px solid black'
-        }
-
-
-        RowExc.querySelector('#Titles1').innerText = 'Expected time and cost per pile' //fixed + machine
-        RowExc.querySelector('#Titles2').innerText = 'Current avg time and cost per pile'
-        RowExc.querySelector('#Titles3').innerText = 'Expected CO2 emission per pile' //Remember to add embedded
-        RowExc.querySelector('#Titles4').innerText = 'Current avg. CO2 emission per pile'
-        RowExc.querySelector('#Titles5').innerText = 'Current total CO2 emissions'
-        RowExc.querySelector('#Titles6').innerText = 'Status' //(ok/delayed/high emissions) //can it send automatic alert
-        RowExc.querySelector('#Titles7').innerText = 'Button' //(ok/delayed/high emissions) //Button for sending email 
-        RowExc.querySelector('#Titles8').innerText = 'Button' //(ok/delayed/high emissions) //Button for sending email 
-
-        const RowTwoExc = document.createElement('tr');
-        table2Exc.appendChild(RowTwoExc)
-        for (let index = 1; index < 9; index++) {
-            const RowTwoData = document.createElement('td');
-            RowTwoExc.appendChild(RowTwoData)
-            RowTwoData.style.width = '10%'
-            RowTwoData.id = 'Titles' + [index]
-            RowTwoData.style.border = '2px solid black'
-        }
-
-
-        RowTwoExc.querySelector('#Titles1').innerText = 'Expected time and cost per pile' //fixed + machine
-        RowTwoExc.querySelector('#Titles2').innerText = 'Current avg time and cost per pile'
-        RowTwoExc.querySelector('#Titles3').innerText = 'Expected CO2 emission per pile' //Remember to add embedded
-        RowTwoExc.querySelector('#Titles4').innerText = 'Current avg. CO2 emission per pile'
-        RowTwoExc.querySelector('#Titles5').innerText = 'Current total CO2 emissions'
-        RowTwoExc.querySelector('#Titles6').innerText = 'Status' //(ok/delayed/high emissions) //can it send automatic alert
-        RowTwoExc.querySelector('#Titles7').innerText = 'Button' //(ok/delayed/high emissions) //Button for sending email 
-        RowTwoExc.querySelector('#Titles8').innerText = 'bUTTON'
-
         const tablebuttonsExc = document.createElement('table');
         const buttonRowsExc = document.createElement('tr');
         tablebuttonsExc.appendChild(buttonRowsExc)
@@ -812,8 +894,9 @@ class ActivitiesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
         button2Exc.textContent = 'Open simulation tab'
         button3Exc.textContent = 'See piles details'
 
+
+
         this.content.appendChild(table1Exc)
-        this.content.appendChild(table2Exc)
         this.content.appendChild(tablebuttonsExc)
 
 
@@ -822,5 +905,5 @@ class ActivitiesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
     }
 }
 
-Autodesk.Viewing.theExtensionManager.registerExtension('DatachartPilenew', DatachartPilenew);
+Autodesk.Viewing.theExtensionManager.registerExtension('ActivitiesOverview', ActivitiesOverview);
 

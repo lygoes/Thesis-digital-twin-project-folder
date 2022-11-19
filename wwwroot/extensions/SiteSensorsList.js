@@ -86,7 +86,7 @@ class SiteSensorsList extends BaseExtension {
     }
 
     onToolbarCreated() {
-        this._barChartPanel = new DatachartPanel(this, 'datachart-panel-new', 'Datachart Pile', { x: 10, y: 10, chartType: 'bar' });
+        this._barChartPanel = new SiteSensorData(this, 'datachart-site-sensors', 'Site Sensors Data', { x: 10, y: 10, chartType: 'bar' });
         this._Button = this.createToolbarButton('sensor-list-button', 'https://img.icons8.com/external-sbts2018-outline-sbts2018/452/external-sensor-basic-ui-elements-2.3-sbts2018-outline-sbts2018.png', 'Show Site Sensors List');
 
         setTimeout(() => { //needs the timeout else it creates panel as soon as creates the toolbar. Unless changes
@@ -129,8 +129,46 @@ class SiteSensorsList extends BaseExtension {
 
             })
 
+            //below is for updating chart when select container changes
+            const selectElement = this._barChartPanel.container.querySelector('select.props');
+            selectElement.onchange = (event) => {
+                const value = event.target.value;
 
+                switch (value) {
+                    case 'CO2':
+                        this._barChartPanel.chart.data.datasets[0].data = [30, 50, 60, 20, 70, 80]; //CO2
+                        this._barChartPanel.chart.data.datasets[0].label = 'CO2'
+                        this._barChartPanel.chart.data.datasets[0].backgroundColor = '#3e95cd'
+                        this._barChartPanel.chart.data.datasets[0].borderColor = '#3e95cd'
+                        this._barChartPanel.chart.update();
+                        console.log('co2 maaand');
+                        break;
+                    case 'NOx':
+                        this._barChartPanel.chart.data.datasets[0].data = [50, 30, 60, 20, 40, 30]; //CO2
+                        this._barChartPanel.chart.data.datasets[0].label = 'NOx'
+                        this._barChartPanel.chart.data.datasets[0].backgroundColor = "#8e5ea2"
+                        this._barChartPanel.chart.data.datasets[0].borderColor = "#8e5ea2"
+                        this._barChartPanel.chart.update();
+                        console.log('NOx maaand');
+                        break;
+                    case 'PM':
+                        this._barChartPanel.chart.data.datasets[0].data = [20, 10, 30, 20, 5, 10]; //CO2
+                        this._barChartPanel.chart.data.datasets[0].label = 'PM'
+                        this._barChartPanel.chart.data.datasets[0].backgroundColor = "#FFA500"
+                        this._barChartPanel.chart.data.datasets[0].borderColor = "#FFA500"
+
+
+ 
+                        this._barChartPanel.chart.update();
+
+                        console.log('PM maaand');
+                        break;
+                    default:
+                        break;
+                }
+            }
         };
+
 
 
 
@@ -289,7 +327,7 @@ class SiteSensorsList extends BaseExtension {
 }
 
 //Creates Data chart Panel
-class DatachartPanel extends Autodesk.Viewing.UI.DockingPanel {
+class SiteSensorData extends Autodesk.Viewing.UI.DockingPanel {
     constructor(extension, id, title, options) {
         super(extension.viewer.container, id, title, options);
         this.extension = extension;
@@ -317,7 +355,6 @@ class DatachartPanel extends Autodesk.Viewing.UI.DockingPanel {
         <div class="props-container" style="position: relative; height: 25px; padding: 0.5em;">
         <select class="props">
             <option value="CO2">CO2</option>
-            <option value="Fuel">Fuel</option>
             <option value="NOx">NOx</option>
             <option value="PM">PM</option>
         </select>
@@ -327,65 +364,72 @@ class DatachartPanel extends Autodesk.Viewing.UI.DockingPanel {
         </div>
         `;
 
-        const selectElement = this.content.querySelector('select.props');
-        selectElement.onchange = this.updateChart;
+        //moved this to the top sot hat could update
+        // const selectElement = this.content.querySelector('select.props');
+        // selectElement.onchange = this.updateChart;
+        // this.select = selectElement;
 
 
-        this.select = selectElement;
         this.canvas = this.content.querySelector('canvas.chart');
         this.container.appendChild(this.content);
     }
 
-    updateChart(event) {
-        const value = event.target.value;
+    // updateChart(event) {
+    //     const value = event.target.value;
 
-        switch (value) {
-            case 'CO2':
-                console.log('co2 maaand');
-                break;
-            case 'NOx':
-                console.log('NOx maaand');
-                break;
-            case 'Fuel':
-                console.log('Fuel maaand');
-                break;
-            case 'PM':
-                console.log('PM maaand');
-                break;
-            default:
-                break;
-        }
-    }
+    //     switch (value) {
+    //         case 'CO2':
+    //             console.log('co2 maaand');
+    //             break;
+    //         case 'NOx':
+    //             this.chart.data.datasets[0].data = [50,30,60,20,40,30]; //CO2
+    //             this.chart.data.datasets[0].label = 'NOx' 
+    //             this.chart.update();
+    //             console.log('NOx maaand');
+    //             break;
+    //         case 'PM':
+    //             console.log('PM maaand');
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    // }
 
     createChart() {
         return new Chart(this.canvas.getContext('2d'), {
-            type: 'bar',
+            type: 'line',
             data: {
-                labels: ['Emissions Total'], //or PilesNames[0]
+                labels: ['06/10/22 14:50', '06/10/22 14:51', '06/10/22 14:52', '06/10/22 14:53', '06/10/22 14:54', '06/10/22 14:55'], //get time stamps
                 datasets: [{
-                    data: [Emissiondata[0]],
-                    label: 'Emissions Total',
+                    data: [30, 50, 60, 20, 70, 80],
+                    label: "CO2 ",
                     borderColor: "#3e95cd",
-                    backgroundColor: ["#3e95cd"],
+                    backgroundColor: "#3e95cd",
                     fill: false
                 },
-                {
-                    data: [WorkingTime[0]],
-                    label: "Working time",
-                    borderColor: "#8e5ea2",
-                    backgroundColor: ["#3e95cd"],
-                    fill: false
-                }
-
+                    // {
+                    //     data: [50,30,60,20,40,30],
+                    //     label: "PM",
+                    //     borderColor: "#8e5ea2",
+                    //     backgroundColor: "#8e5ea2",
+                    //     fill: false
+                    // }, {
+                    //     data: [450,40,30,70,60,20],
+                    //     label: "NO2",
+                    //     borderColor: "#FFA500",
+                    //     backgroundColor: "#FFA500",
+                    //     fill: false
+                    // }
                 ]
             },
             options: {
                 title: {
                     display: true,
-                    text: 'Data per piles'
+                    text: 'Data Piledriver'
                 }
             }
         });
+
     }
 }
 
@@ -547,37 +591,35 @@ class SensorListPanel extends Autodesk.Viewing.UI.PropertyPanel {
         const firstRowSensorList = document.createElement('tr');
         sensorList.appendChild(firstRowSensorList)
 
-        for (let index = 1; index < 9; index++) {
-            const RowTitleSensors = document.createElement('td');
-            firstRowSensorList.appendChild(RowTitleSensors)
-            RowTitleSensors.id = 'Title' + [index]
-            RowTitleSensors.style.border = '2px solid black'
+        for (let index = 1; index < 8; index++) {
+            const RowTitleSensorList = document.createElement('td');
+            firstRowSensorList.appendChild(RowTitleSensorList)
+            RowTitleSensorList.id = 'Title' + [index]
+            RowTitleSensorList.style.border = '2px solid black'
         }
 
         firstRowSensorList.querySelector('#Title1').innerText = 'Device'
         firstRowSensorList.querySelector('#Title2').innerText = 'Level'
-        firstRowSensorList.querySelector('#Title3').innerText = 'Position'
-        firstRowSensorList.querySelector('#Title4').innerText = 'Type'
-        firstRowSensorList.querySelector('#Title5').innerText = 'latest CO2'
-        firstRowSensorList.querySelector('#Title6').innerText = 'latest PM'
-        firstRowSensorList.querySelector('#Title7').innerText = 'latest NOx'
-        firstRowSensorList.querySelector('#Title8').innerText = 'Status?'
+        firstRowSensorList.querySelector('#Title3').innerText = 'Type'
+        firstRowSensorList.querySelector('#Title4').innerText = 'latest CO2'
+        firstRowSensorList.querySelector('#Title5').innerText = 'latest PM'
+        firstRowSensorList.querySelector('#Title6').innerText = 'latest NOx'
+        firstRowSensorList.querySelector('#Title7').innerText = 'Status'
 
 
 
-        for (let index = 0; index < 15; index++) {
-            const allRowsSensor = document.createElement('tr');
-            sensorList.appendChild(allRowsSensor)
+        for (let index = 0; index < 5; index++) {
+            const allRowsSensorList = document.createElement('tr');
+            sensorList.appendChild(allRowsSensorList)
             const deviceName = document.createElement('th');
             deviceName.innerText = 'Device' + (index + 1); //use array with device names
             // th.id = [index]
-            allRowsSensor.appendChild(deviceName)
+            allRowsSensorList.appendChild(deviceName)
             const Level = document.createElement('td');
             Level.innerText = '0.0';
-            const Position = document.createElement('td');
-            Position.innerText = 'Lat: Long: '; //get array with positions in order
+
             const Type = document.createElement('td');
-            Type.innerText = 'CO2/PM/NOx'; //or wind/noise - get from array
+            Type.innerText = 'CO2/PM/NOx';
             const CO2 = document.createElement('td');
             CO2.innerText = 'TBD' //get latest value here
             const PM = document.createElement('td');
@@ -589,14 +631,81 @@ class SensorListPanel extends Autodesk.Viewing.UI.PropertyPanel {
             // if ('TBD' > 50) { //replace 'TBD with the element that goes inside machCO2 inner text
             //   machCO2.style.color = 'red'
             // }
-            allRowsSensor.appendChild(Level)
-            allRowsSensor.appendChild(Position)
-            allRowsSensor.appendChild(Type)
-            allRowsSensor.appendChild(CO2)
-            allRowsSensor.appendChild(PM)
-            allRowsSensor.appendChild(NOx)
-            allRowsSensor.appendChild(Status)
-            allRowsSensor.style.textAlign = 'center'
+            allRowsSensorList.appendChild(Level)
+            allRowsSensorList.appendChild(Type)
+            allRowsSensorList.appendChild(CO2)
+            allRowsSensorList.appendChild(PM)
+            allRowsSensorList.appendChild(NOx)
+            allRowsSensorList.appendChild(Status)
+            allRowsSensorList.style.textAlign = 'center'
+            deviceName.addEventListener('click', () => {
+                //needs to highlight sprite 
+                // this.viewer.select(ListPilesDbIds[index], Autodesk.Viewing.SelectionMode.REGULAR)
+                console.log('device' + [index] + 'was clicked')
+            })
+
+            // th.style.pointerEvents = 'fill'
+        }
+
+        const AirSensorList = document.createElement('table');
+        AirSensorList.style.border = '2px solid black'
+        AirSensorList.style.borderCollapse = 'collapse'
+        AirSensorList.style.width = '60%'
+        AirSensorList.style.marginTop = '10px'
+
+        this.content.appendChild(AirSensorList)
+
+        const firstRowAirSensorList = document.createElement('tr');
+        AirSensorList.appendChild(firstRowAirSensorList)
+
+        for (let index = 1; index < 8; index++) {
+            const RowTitleAirSensors = document.createElement('td');
+            firstRowAirSensorList.appendChild(RowTitleAirSensors)
+            RowTitleAirSensors.id = 'Title' + [index]
+            RowTitleAirSensors.style.border = '2px solid black'
+        }
+
+        firstRowAirSensorList.querySelector('#Title1').innerText = 'Device'
+        firstRowAirSensorList.querySelector('#Title2').innerText = 'Level'
+        firstRowAirSensorList.querySelector('#Title3').innerText = 'Type'
+        firstRowAirSensorList.querySelector('#Title4').innerText = 'latest Wind Speed'
+        firstRowAirSensorList.querySelector('#Title5').innerText = 'latest Noise level'
+        firstRowAirSensorList.querySelector('#Title6').innerText = 'latest TBD'
+        firstRowAirSensorList.querySelector('#Title7').innerText = 'Status'
+
+
+
+        for (let index = 0; index < 2; index++) {
+            const allRowsAirSensor = document.createElement('tr');
+            AirSensorList.appendChild(allRowsAirSensor)
+            const deviceName = document.createElement('th');
+            deviceName.innerText = 'Device' + (index + 1); //use array with device names
+            // th.id = [index]
+            allRowsAirSensor.appendChild(deviceName)
+            const Level = document.createElement('td');
+            Level.innerText = '0.0';
+
+            const Type = document.createElement('td');
+            Type.innerText = 'Wind/Noise'; //or wind/noise - get from array
+            const Wind = document.createElement('td');
+            Wind.innerText = 'TBD' //get latest value here
+            const Noise = document.createElement('td');
+            Noise.innerText = 'TBD' //make it so that if its toxic turns red
+            const TBD = document.createElement('td');
+            TBD.innerText = 'TBD'
+            const Status = document.createElement('td');
+            Status.innerText = 'OK' //make it so that if this is bigger than a value color in red
+            // if ('TBD' > 50) { //replace 'TBD with the element that goes inside machCO2 inner text
+            //   machCO2.style.color = 'red'
+            // }
+            allRowsAirSensor.appendChild(Level)
+
+            allRowsAirSensor.appendChild(Type)
+            allRowsAirSensor.appendChild(Wind)
+            allRowsAirSensor.appendChild(Noise)
+            allRowsAirSensor.appendChild(TBD)
+            allRowsAirSensor.appendChild(Status)
+            allRowsAirSensor.style.textAlign = 'center'
             deviceName.addEventListener('click', () => {
                 //needs to highlight sprite 
                 // this.viewer.select(ListPilesDbIds[index], Autodesk.Viewing.SelectionMode.REGULAR)
@@ -627,8 +736,7 @@ class SensorListPanel extends Autodesk.Viewing.UI.PropertyPanel {
         cell2.appendChild(button2)
         cell3.appendChild(button3)
         // cell4.appendChild(button4)
-        button1.innerHTML = '<a href="mailto:goes.lylian@gmail.com" style="text-decoration:none; color:red">Send email</a>'
-        button2.style.color = 'red'
+        button1.innerHTML = '<a href="mailto:goes.lylian@gmail.com" style="text-decoration:none; color:black">Send email</a>'
         button1.style.borderRadius = '4px'
         button1.style.cursor = 'pointer'
 
