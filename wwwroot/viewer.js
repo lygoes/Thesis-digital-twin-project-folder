@@ -5,7 +5,7 @@ import './extensions/SummaryExtension.js';
 import './extensions/SiteSensorsList.js';  //can be deleted now
 import './extensions/SpritesExtension.js';
 // import './extensions/PilesHeatmap.js'; //can be deleted if it works
-import './extensions/DatachartPile.js';
+import './extensions/ActivitiesOverview.js';
 import './extensions/GeoLocationExtension.js';
 // import './extensions/TestHeatmapwithAirLab.js'; // //needs to be added to device list panel
 // import './extensions/TestHeatmapForArea.js'; //can probably be deleted now
@@ -15,7 +15,7 @@ import './extensions/GeoLocationExtension.js';
 // import './extensions/MachineSelection.js'; //can be deleted now
 import './extensions/AppearObjects.js';
 import './extensions/MachineInfoPanel.js'; 
-import './extensions/PileslistPanel.js';  //can be deleted now
+// import './extensions/PileslistPanel.js';  //can be deleted now
 
 
 
@@ -52,7 +52,7 @@ export function initViewer(container) {
                     'GisToolExtension',
                     // 'TestHeatmapwithAirLab', //needs to be added to device list panel
                     // 'TestHeatmapForArea',
-                    'DatachartPilenew',
+                    'ActivitiesOverview',
                     // 'TestHeatmapForEarthwork', //needs to be added to piles list panel
                     // 'DrawLinesExtension', //can be deleted now
                     // 'CustomPropertyPanelExtension',
