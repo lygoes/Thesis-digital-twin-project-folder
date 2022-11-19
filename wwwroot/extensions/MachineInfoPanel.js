@@ -148,13 +148,13 @@ class MachinesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
         this.lines = null;
         this._areLinesShowing = false;
         this.container.style.height = "350px";
-        this.container.style.width = "700px";
+        this.container.style.width = "900px";
         //  this.scrollContainer.style.width = "auto";
         // this.scrollContainer.style.height = "auto";
         // this.scrollContainer.style.resize = "auto";
 
-        this.title.style.backgroundColor = 'LightGray'
-        this.footer.style.backgroundColor = 'LightGray'
+        // this.title.style.backgroundColor = 'LightGray'
+        // this.footer.style.backgroundColor = 'LightGray'
         this.content = document.createElement('div');
         // this.content.style.backgroundColor = 'LightGray'
 
@@ -163,84 +163,105 @@ class MachinesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
         machineList.style.border = '2px solid black'
         machineList.style.borderCollapse = 'collapse'
         machineList.style.width ='60%'
+        machineList.style.marginTop = '15px'
         
         this.content.appendChild(machineList)
-
+        
             
         const firstRowMachineList = document.createElement('tr');
         machineList.appendChild(firstRowMachineList)
+        firstRowMachineList.style.backgroundColor = 'gainsboro' //	lightgray
         
-                for (let index = 1; index < 13; index++) {
+        
+                for (let index = 1; index < 16; index++) {
                   const RowTitleMachineList = document.createElement('th');
                   firstRowMachineList.appendChild(RowTitleMachineList)
                   RowTitleMachineList.id = 'Title'+ [index]
                   RowTitleMachineList.style.border = '2px solid black'
                   }
         
-                  firstRowMachineList.querySelector('#Title1').innerText = 'Model name'
+                  firstRowMachineList.querySelector('#Title1').innerText = 'Model name' //this could also be retrieved automatically from machine BIM model
                   firstRowMachineList.querySelector('#Title2').innerText = 'Type'
-                  firstRowMachineList.querySelector('#Title3').innerText = 'Link Specs'
-                  firstRowMachineList.querySelector('#Title4').innerText = 'Work start-end'
+                  firstRowMachineList.querySelector('#Title3').innerText = 'Specs'
+                  firstRowMachineList.querySelector('#Title4').innerText = 'Work start / end'
                   firstRowMachineList.querySelector('#Title5').innerText = 'Total working hours'
-                  firstRowMachineList.querySelector('#Title6').innerText = 'Productive hours'
+                  firstRowMachineList.querySelector('#Title6').innerText = 'Drilling hours'
                   firstRowMachineList.querySelector('#Title7').innerText = 'Idling hours'
-                  firstRowMachineList.querySelector('#Title8').innerText = 'Distance travelled'
-                  firstRowMachineList.querySelector('#Title9').innerText = 'Fuel level'
-                  firstRowMachineList.querySelector('#Title10').innerText = 'Avg. Fuel consumption'
-                  firstRowMachineList.querySelector('#Title11').innerText = 'Current usage cost'
-                  firstRowMachineList.querySelector('#Title12').innerText = 'Performance'
+                  firstRowMachineList.querySelector('#Title8').innerText = 'Driving hours'
+                  firstRowMachineList.querySelector('#Title9').innerText = 'Distance travelled (km)'
+                  firstRowMachineList.querySelector('#Title10').innerText = 'Total fuel consumed (l)' //tank capacity is 1200 L
+                  firstRowMachineList.querySelector('#Title11').innerText = 'Avg fuel per hour (l)'
+                  firstRowMachineList.querySelector('#Title12').innerText = 'Total fuel cost (DKK)'
+                  firstRowMachineList.querySelector('#Title13').innerText = 'Total CO2 Emissions (kg)'
+                  firstRowMachineList.querySelector('#Title14').innerText = 'Avg. CO2 per hour (kg)'
+                  firstRowMachineList.querySelector('#Title15').innerText = 'Performance'
         
         const secondRowMachineList = document.createElement('tr');
           machineList.appendChild(secondRowMachineList)
         
-          for (let index = 1; index < 13; index++) {
+          for (let index = 1; index < 16; index++) {
             const secondrowData = document.createElement('td');
             secondRowMachineList.appendChild(secondrowData)
+            secondrowData.style.border = '2px solid black'
+            secondrowData.style.minWidth ='50px'
+            secondrowData.style.padding ='2px 5px'
             secondrowData.id = 'data'+ [index]
             }
-            secondRowMachineList.querySelector('#data1').innerText = 'Model name'
-            secondRowMachineList.querySelector('#data2').innerText = 'Type'
-            secondRowMachineList.querySelector('#data3').innerText = 'Specs'
-            secondRowMachineList.querySelector('#data4').innerText = 'Work start-end'
-            secondRowMachineList.querySelector('#data5').innerText = 'Total working hours'
-            secondRowMachineList.querySelector('#data6').innerText = 'Productive hours'
-            secondRowMachineList.querySelector('#data7').innerText = 'Idling hours'
-            secondRowMachineList.querySelector('#data8').innerText = 'Distance travelled'
-            secondRowMachineList.querySelector('#data9').innerText = 'Fuel level'
-            secondRowMachineList.querySelector('#data10').innerText = 'Avg. Fuel consumption'
-            secondRowMachineList.querySelector('#data11').innerText = 'Current usage cost'
-            secondRowMachineList.querySelector('#data12').innerText = 'Performance'
+            secondRowMachineList.querySelector('#data1').innerText = 'Bauer BG 55 V'
+            secondRowMachineList.querySelector('#data2').innerText = 'Drilling rig'
+            // secondRowMachineList.querySelector('#data3').innerText = 'Specs'
+            secondRowMachineList.querySelector('#data3').innerHTML = '<a href="https://www.bauer.de/export/shared/documents/pdf/bma/datenblatter/BG_Rotary_Drilling_Rig/BG_55_BS_115_RotaryDrilling_Rig_EN_905_871_2.pdf";>Specs</a>'
+            secondRowMachineList.querySelector('#data4').innerText = '01-09-22 / 01-12-22'
+            secondRowMachineList.querySelector('#data5').innerText = '38' //Gets length of machine array and divides by 60
+            secondRowMachineList.querySelector('#data6').innerText = '25' //Gets length of array with data as 'drilling' only and divides by 60
+            secondRowMachineList.querySelector('#data7').innerText = '10' //Gets length of array with data as 'idling' only and divides by 60
+            secondRowMachineList.querySelector('#data8').innerText = '3' //Gets length of array with data as 'driving' only and divides by 60
+            secondRowMachineList.querySelector('#data9').innerText = '50' //Gets distance in last object of array
+            secondRowMachineList.querySelector('#data10').innerText = '300'
+            secondRowMachineList.querySelector('#data11').innerText = '7.89' //divides total fuel by total working hours
+            secondRowMachineList.querySelector('#data12').innerText = '4500,00' //multiplies total fuel consumption by diesel cost per litre DKK15 today
+            secondRowMachineList.querySelector('#data13').innerText = '300'
+            secondRowMachineList.querySelector('#data14').innerText = '7.89'
+            secondRowMachineList.querySelector('#data15').innerText = 'Excessive idling' //function that if avg hours/CO2 per hour/fuel exceeds desired amount it says high hours/CO2 emissions/high fuel consumption
+            secondRowMachineList.querySelector('#data15').style.color = 'red'
         
           const thirdRowMachineList = document.createElement('tr');
           machineList.appendChild(thirdRowMachineList)
         
-          for (let index = 1; index < 13; index++) {
+          for (let index = 1; index < 16; index++) {
             const thirdRowData = document.createElement('td');
+            thirdRowData.style.border = '2px solid black'
             thirdRowMachineList.appendChild(thirdRowData)
             thirdRowData.id = 'data'+ [index]
             }
-            thirdRowMachineList.querySelector('#data1').innerText = 'Model name'
-            thirdRowMachineList.querySelector('#data2').innerText = 'Type'
+            thirdRowMachineList.querySelector('#data1').innerText = 'Hitachi ZX135US-6'
+            thirdRowMachineList.querySelector('#data2').innerText = 'Excavator'
             thirdRowMachineList.querySelector('#data3').innerText = 'Specs'
-            thirdRowMachineList.querySelector('#data4').innerText = 'Work start-end'
-            thirdRowMachineList.querySelector('#data5').innerText = 'Total working hours'
-            thirdRowMachineList.querySelector('#data6').innerText = 'Productive hours'
-            thirdRowMachineList.querySelector('#data7').innerText = 'Idling hours'
-            thirdRowMachineList.querySelector('#data8').innerText = 'Distance travelled'
-            thirdRowMachineList.querySelector('#data9').innerText = 'Fuel level'
-            thirdRowMachineList.querySelector('#data10').innerText = 'Avg. Fuel consumption'
-            thirdRowMachineList.querySelector('#data11').innerText = 'Current usage cost'
-            thirdRowMachineList.querySelector('#data12').innerText = 'Performance'
+            thirdRowMachineList.querySelector('#data3').innerHTML = '<a href="https://www.hitachicm.eu/wp-content/uploads/2018/08/KA-EN283EU.pdf";>Specs</a>'
+            thirdRowMachineList.querySelector('#data4').innerText = '20-11-22 / 20-12-23'
+            thirdRowMachineList.querySelector('#data5').innerText = '50' //Gets length of machine array and divides by 60
+            thirdRowMachineList.querySelector('#data6').innerText = '25' //Gets length of array with data as 'drilling' only and divides by 60
+            thirdRowMachineList.querySelector('#data7').innerText = '15' //Gets length of array with data as 'idling' only and divides by 60
+            thirdRowMachineList.querySelector('#data8').innerText = '10' //Gets length of array with data as 'driving' only and divides by 60
+            thirdRowMachineList.querySelector('#data9').innerText = '100' //Gets distance in last object of array
+            thirdRowMachineList.querySelector('#data10').innerText = '500'
+            thirdRowMachineList.querySelector('#data11').innerText = '10' //divides total fuel by total working hours
+            thirdRowMachineList.querySelector('#data12').innerText = '7500,00' //multiplies total fuel consumption by diesel cost per litre DKK15 today
+            thirdRowMachineList.querySelector('#data13').innerText = '500'
+            thirdRowMachineList.querySelector('#data14').innerText = '10'
+            thirdRowMachineList.querySelector('#data15').innerText = 'Excessive CO2 ' //function that if avg hours/CO2 per hour/fuel exceeds desired amount it says high hours/CO2 emissions/high fuel consumption
+            //if function that depending on status color writes in red
+            thirdRowMachineList.querySelector('#data15').style.color = 'red'
+            
+            //Text 
+            const h1 = document.createElement('h1');
+            h1.innerText = 'Select machine in the model to see charts'
+            h1.style.fontSize = '15px'
+            this.content.appendChild(h1)
         
-
-//Text 
-const h1 = document.createElement('h1');
-h1.innerText = 'Select machine in the model to see charts'
-h1.style.fontSize = '15px'
-this.content.appendChild(h1)
-
-            //buttons 
+        //buttons 
             const machineButtonstable = document.createElement('table');
+            machineButtonstable.style.marginTop = '10px'
             const machineButtonRows = document.createElement('tr');
             machineButtonstable.appendChild(machineButtonRows)
             const machineButtonsCell1 = document.createElement('td')
@@ -255,12 +276,18 @@ this.content.appendChild(h1)
             machineButtonsCell1.appendChild(machineButton1)
             machineButtonsCell2.appendChild(machineButton2)
             machineButtonsCell3.appendChild(machineButton3)
-            machineButton3.innerHTML = '<a href="mailto:goes.lylian@gmail.com" style="text-decoration:none; color:red">Send alert</a>'
+            // machineButton3.innerHTML = '<a href="mailto:goes.lylian@gmail.com" style="text-decoration:none; color:red">Send alert</a>'
+            machineButton3.innerHTML = '<a href="mailto:goes.lylian@gmail.com" style="text-decoration:none; color:black">Send alert</a>'
             machineButton3.style.borderRadius = '4px'
             machineButton3.style.cursor = 'pointer'
             // button1.onclick()
         
+
+            
+            
             machineButton1.textContent = 'Draw / Erase Trajectory' //make two buttons form achine 1 and two
+            machineButton1.style.borderRadius = '4px'
+            machineButton1.style.cursor = 'pointer'
             machineButton1.addEventListener('click', () => {
             if (this._areLinesShowing) { // Same as (this._isSpritesShowing === true)
                 // If showing disable sprites.
@@ -272,8 +299,10 @@ this.content.appendChild(h1)
                 this._areLinesShowing = true;
             }
         })
-
-            machineButton2.textContent = 'Simulate performance'
+        
+        machineButton2.textContent = 'Simulate performance'
+        machineButton2.style.borderRadius = '4px'
+        machineButton2.style.cursor = 'pointer'
             this.content.appendChild(machineButtonstable)
             
             this.scrollContainer.appendChild(this.content); //content needs to go inside scroll container
