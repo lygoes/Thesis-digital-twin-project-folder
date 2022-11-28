@@ -23,10 +23,12 @@ for (let i = 1; i < ListPilesDbIds.length + 1; i++) {
     SensorPointsNames.push(PointNames)
 }
 
-//necessary for the charts 
+//necessary for the charts and maybe heatmap. Stores all values so that it can find by index when selcetion changes
 const dataForallPiles = [];
 const Emissiondata = []; //this is CO2
 const WorkingTime = [];
+const AvgPowers = [];
+const AvgSpeeds = [];
 
 let newChartLabel = [];
 let newchartCO2Data = [];
@@ -38,12 +40,16 @@ let newChartDrillingSpeed = [];
 
 // const PilesNames = ['Pile 1', 'Pile 2', 'Pile 3', 'Pile 4'] //for piles charts - will use the above
 
+//also for the charts but it can probably use for heatmaps too
 setTimeout(() => {
     const data = getDataforPiles();
     dataForallPiles.push(data);
     dataForallPiles[0].forEach(i => {
-        Emissiondata.push(i.TotalEmissions)
+        // Emissiondata.push(i.TotalEmissions) //replace with i.SumCO2
+        Emissiondata.push(i.SumCO2 / 1000) //for now divides by 1000 because is in grams to kgs
         WorkingTime.push(i.WorkingTime)
+        AvgPowers.push(i.AvgPower)
+        AvgSpeeds.push(i.AvgSpeed)
 
     })
     // console.log('here is the data', dataForallPiles);
@@ -51,6 +57,7 @@ setTimeout(() => {
     // console.log('emission data 0 for test', Emissiondata[0])   
 }, 10000) //not sure if this is needed here because there is another one down there when creating the panels
 
+let countPilesfinished = 0
 
 class ActivitiesOverview extends BaseExtension {
     constructor(viewer, options) {
@@ -58,6 +65,7 @@ class ActivitiesOverview extends BaseExtension {
         // this._barChartButton = null;
         this._barChartPanel = null;
         this._PileslistPanel = null;
+        this._PilesSimulationPanel = null;
         this._ActivitiesOverviewPanel = null;
         this._extension = null; //heATMAP
         this._isHeatmapShowing = false; //heatmap
@@ -95,6 +103,7 @@ class ActivitiesOverview extends BaseExtension {
         setTimeout(() => { //needs the timeout else it creates panel as soon as creates the toolbar. Unless changes
             this._ActivitiesOverviewPanel = new ActivitiesOverviewPanel(this.viewer, this.viewer.container, 'ActivitiesOverviewPanel', 'Show Activities Overview');
             this._PileslistPanel = new PilesListPanel(this.viewer, this.viewer.container, 'listPilesPanel', 'Piles list');
+            this._PilesSimulationPanel = new PilesSimulationPanel(this.viewer, this.viewer.container, 'PilesSimulationPanel', 'Piles simulation');
             this._HeatmapSwitchPanel = new HeatmapSwitchPanel(this, 'piles-heatmap-panel', 'Heatmap Piles', { x: 10, y: 10 });
         }, 10000)
         this._barChartButton.onClick = () => {
@@ -108,14 +117,23 @@ class ActivitiesOverview extends BaseExtension {
 
             //Gets button to add click event to appear list of piles
             this._ActivitiesOverviewPanel.content.querySelector('#PilesDetailsButton').addEventListener('click', () => {
-                this._PileslistPanel.setVisible(!this._barChartPanel.isVisible());
+                this._PileslistPanel.setVisible(!this._PileslistPanel.isVisible());
                 this._barChartButton.setState(this._PileslistPanel.isVisible() ? Autodesk.Viewing.UI.Button.State.ACTIVE : Autodesk.Viewing.UI.Button.State.INACTIVE);
 
                 this._barChartPanel.setVisible(!this._barChartPanel.isVisible());
                 this._barChartButton.setState(this._barChartPanel.isVisible() ? Autodesk.Viewing.UI.Button.State.ACTIVE : Autodesk.Viewing.UI.Button.State.INACTIVE);
-                //Gets button to add click event to initialize piles heatmap 
+                
+            })
+            
+            //Gets button to add click event to appear list of piles
+            this._ActivitiesOverviewPanel.content.querySelector('#SimulatePiles').addEventListener('click', () => {
+                this._PilesSimulationPanel.setVisible(!this._PilesSimulationPanel.isVisible());
+                this._barChartButton.setState(this._PilesSimulationPanel.isVisible() ? Autodesk.Viewing.UI.Button.State.ACTIVE : Autodesk.Viewing.UI.Button.State.INACTIVE);
 
             })
+            
+            
+            //Gets button to add click event to initialize piles heatmap 
             this._ActivitiesOverviewPanel.content.querySelector('#PilesHeatmapButton').addEventListener('click', () => {
                 this._HeatmapSwitchPanel.setVisible(!this._HeatmapSwitchPanel.isVisible());
                 this._barChartButton.setState(this._HeatmapSwitchPanel.isVisible() ? Autodesk.Viewing.UI.Button.State.ACTIVE : Autodesk.Viewing.UI.Button.State.INACTIVE);
@@ -155,11 +173,13 @@ class ActivitiesOverview extends BaseExtension {
                 // console.log('emissiondatapile', Emissiondata[i])
                 newChartLabel = PilesNames[i] //needs to get it from the list that says D1180-1
                 newchartCO2Data = Emissiondata[i] //CO2 DATA
-                newchartNO2Data = WorkingTime[i] //CO2 DATA
+                newchartNO2Data = Emissiondata[i] //CO2 DATA
                 newchartPMData = Emissiondata[i] //CO2 DATA
-                newchartPowerData = Emissiondata[i] //CO2 DATA
+                // newchartPowerData = AvgPowers[i] //CO2 DATA
+                newchartPowerData = 0 //CO2 DATA
                 newChartDrillingTime = WorkingTime[i] //neds to be drilling time
-                newChartDrillingSpeed = WorkingTime[i] //neds to be drilling time
+                // newChartDrillingSpeed = AvgSpeeds[i] //neds to be drilling time
+                newChartDrillingSpeed = 0 //neds to be drilling time
                 console.log('chartdata', newchartCO2Data);
                 // console.log(this._barChartPanel);
                 this._barChartPanel.chart.data.labels[0] = newChartLabel;
@@ -230,7 +250,7 @@ class ActivitiesOverview extends BaseExtension {
         //for clamping values but not sure if thats necessary yet - depends on mx and min
         const ClampedValues = []
         DataBboxespilesEmissions.forEach(i => {
-            const clamp = Math.min(Math.max(i.TotalEmissions / 100, 0.0), 1.0); //Math.min(Math.max(num, min), max);
+            const clamp = Math.min(Math.max(i.SumCO2 / 1000, 0.0), 1.0); //Math.min(Math.max(num, min), max);
             ClampedValues.push(clamp)
         })
 
@@ -244,7 +264,7 @@ class ActivitiesOverview extends BaseExtension {
                     5
                 ],
                 CO2: [
-                    (DataBboxespilesEmissions[i].TotalEmissions) / 100, //divides by 100 bc values need to be < 1
+                    (DataBboxespilesEmissions[i].SumCO2) / 1000, //divides by 100 bc values need to be < 1
                 ]
             }
 
@@ -515,7 +535,7 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
             execStatus.innerText = execStarted()
 
             const execTime = document.createElement('td');
-            execTime.innerText = `${WorkingTime[index]}`  //make it so that if this is bigger than a value color in red
+            execTime.innerText = `${(WorkingTime[index]).toFixed(2)}`  //make it so that if this is bigger than a value color in red
             if (WorkingTime[index] == 0) {
                 execTime.innerText = '-'
             } else if (WorkingTime[index] > 50) {
@@ -524,7 +544,7 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
             const embCO2 = document.createElement('td');
             embCO2.innerText = 'TBD'
             const machCO2 = document.createElement('td');
-            machCO2.innerText = `${Emissiondata[index]}`
+            machCO2.innerText = `${(Emissiondata[index]).toFixed(2)}`
             const ButtonFinishedPile = document.createElement('button')
             ButtonFinishedPile.textContent = 'Mark as Finished'
             ButtonFinishedPile.style.borderRadius = '4px'
@@ -546,10 +566,14 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
                 this.viewer.select(ListPilesDbIds[index], Autodesk.Viewing.SelectionMode.REGULAR)
 
             })
+            let countPilesfinished = 0
             ButtonFinishedPile.addEventListener('click', () => {
                 execStatus.innerText = 'Finished'
                 ButtonFinishedPile.textContent = '-' //can change later to change text content to mark as unfinished
                 ButtonFinishedPile.disabled = 'true'
+                countPilesfinished = countPilesfinished + 1
+                // SecondRow.querySelector('#secondData6').innerText = `${countPilesfinished}` 
+                //needs to make this panel interact with other panel by putting other panel in the extension properties
             })
 
             // th.style.pointerEvents = 'fill'
@@ -561,6 +585,73 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
 
     }
 }
+
+class PilesSimulationPanel extends Autodesk.Viewing.UI.PropertyPanel {
+    constructor(viewer, container, id, title, options) {
+        super(container, id, title, options);
+        this.viewer = viewer;
+        this.container.style.height = "500px";
+        this.container.style.width = "300px";
+        //  this.scrollContainer.style.width = "auto";
+        // this.scrollContainer.style.height = "auto";
+        // this.scrollContainer.style.resize = "auto";
+
+
+        this.content = document.createElement('div');
+
+        const formspace = document.createElement('div')
+
+        formspace.innerHTML = `
+<FORM onsubmit="CalculateResult()">
+<label for="fname">Machine ID:</label>
+<input type="text" id="fname" name="fname"><br><br>
+<label for="lname">No. Operation Hours:</label>
+<input type="text" id="lname" name="lname"><br><br>
+<input type="submit" value="Simulate" class="submit-btn">
+</FORM>
+`;
+
+// formspace.getElementsByClassName()
+
+
+        function CalculateResult(event) {
+            console.log('CalculateResult');
+            console.log(event);
+            event.preventDefault()
+            var FieldValue = document.getElementById("lname").value;
+
+            if (isNaN(FieldValue) | FieldValue == "") {
+                var OutputValue = document.getElementById("OutputValue");
+                while (OutputValue.firstChild) OutputValue.removeChild(OutputValue.firstChild)
+                var ErrorMessage = document.createTextNode("Incorrect or no content in the input field. Note: The system uses . (dot) as decimal separator!");
+                OutputValue.appendChild(ErrorMessage);
+            }
+
+            else { //WRITES another IF condition here depending on type of machine
+                var OutputValue = document.getElementById("OutputValue");
+                while (OutputValue.firstChild) OutputValue.removeChild(OutputValue.firstChild)
+                // var Result = document.createTextNode(FieldValue*3);
+                var result = FieldValue * 3
+                var TextResult = `Expected CO2 Emissions for ${FieldValue} hours of operation based on current data is ${result} kgs of CO2 `
+                var text = document.createTextNode(TextResult);
+                // var Result = document.createTextNode(Math.pow(FieldValue,2));
+                OutputValue.appendChild(text);
+            }
+
+        }
+
+        const output = document.createElement('div')
+        output.id = 'OutputValue'
+
+
+        this.content.appendChild(formspace)
+        this.content.appendChild(output)
+
+        this.scrollContainer.appendChild(this.content); //content needs to go inside scroll container
+
+    }
+}
+
 //can be deleted as property panel
 // class HeatmapSwitchPanel extends Autodesk.Viewing.UI.PropertyPanel {
 //     constructor(viewer, container, id, title, options) {
@@ -584,34 +675,34 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
 
 //     }
 
-    class HeatmapSwitchPanel extends Autodesk.Viewing.UI.DockingPanel {
-        constructor(extension, id, title, options) {
-            super(extension.viewer.container, id, title, options);
-            this.extension = extension;
-            this.container.style.left = (options.x || 0) + 'px';
-            this.container.style.top = (options.y || 0) + 'px';
-            this.container.style.width = (options.width || 300) + 'px';
-            this.container.style.height = (options.height || 200) + 'px';
-            this.container.style.resize = 'none';
-            // this.chartType = options.chartType || 'bar'; // See https://www.chartjs.org/docs/latest for all the supported types of charts
-            // this.chart = this.createChart();
-            // this.newchart = this.updateChart();
-        }
-    
-        initialize() {
-            this.title = this.createTitleBar(this.titleLabel || this.container.id);
-            this.closer = this.createCloseButton();
-            // this.footer = this.createFooter(); //to resize container
-            this.initializeMoveHandlers(this.title);
-            this.initializeCloseHandler(this.closer);
-            this.container.appendChild(this.title);
-            this.container.appendChild(this.closer);
-            this.content = document.createElement('div');
-            // this.content.style.height = '50px';
-            this.content.style.backgroundColor = 'white';
-            //delete the select props for this one 
-            
-            this.content.innerHTML = `
+class HeatmapSwitchPanel extends Autodesk.Viewing.UI.DockingPanel {
+    constructor(extension, id, title, options) {
+        super(extension.viewer.container, id, title, options);
+        this.extension = extension;
+        this.container.style.left = (options.x || 0) + 'px';
+        this.container.style.top = (options.y || 0) + 'px';
+        this.container.style.width = (options.width || 300) + 'px';
+        this.container.style.height = (options.height || 200) + 'px';
+        this.container.style.resize = 'none';
+        // this.chartType = options.chartType || 'bar'; // See https://www.chartjs.org/docs/latest for all the supported types of charts
+        // this.chart = this.createChart();
+        // this.newchart = this.updateChart();
+    }
+
+    initialize() {
+        this.title = this.createTitleBar(this.titleLabel || this.container.id);
+        this.closer = this.createCloseButton();
+        // this.footer = this.createFooter(); //to resize container
+        this.initializeMoveHandlers(this.title);
+        this.initializeCloseHandler(this.closer);
+        this.container.appendChild(this.title);
+        this.container.appendChild(this.closer);
+        this.content = document.createElement('div');
+        // this.content.style.height = '50px';
+        this.content.style.backgroundColor = 'white';
+        //delete the select props for this one 
+
+        this.content.innerHTML = `
             <h1 style="color:red;"> Heatmap Options go here </h1>
             <div class="props-container" style="position: relative; height: 25px; padding: 0.5em;">
             <select class="props">
@@ -625,19 +716,19 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
             <canvas class="chart"></canvas>
             </div>
             `;
-    
-            const selectElement = this.content.querySelector('select.props');
-            selectElement.onchange = this.updateChart;
-    
-    
-            this.select = selectElement;
-            this.canvas = this.content.querySelector('canvas.chart');
-            this.container.appendChild(this.content);
-        }
-    
+
+        const selectElement = this.content.querySelector('select.props');
+        selectElement.onchange = this.updateChart;
+
+
+        this.select = selectElement;
+        this.canvas = this.content.querySelector('canvas.chart');
+        this.container.appendChild(this.content);
+    }
+
     //     updateHeatmap(event) {
     //         // const value = event.target.value;
-    
+
     //         // switch (value) {
     //         //     case 'CO2':
     //         //         console.log('co2 maaand');
@@ -655,9 +746,9 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
     //         //         break;
     //         // }
     //     }
-    
+
     //     createHeatmap() {
-            
+
     // }
 }
 //Activity overview panel 
@@ -723,7 +814,7 @@ class ActivitiesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
         firstRow.querySelector('#Title5').innerText = 'Current cost (DKK)' //Sums fixed + machine cost by time working on piles
         firstRow.querySelector('#Title6').innerText = 'No. piles executed' //based on marking piles as finished
         firstRow.querySelector('#Title7').innerText = 'No. piles to be exec.'
-        firstRow.querySelector('#Title8').innerText = 'Total operation time (h)'
+        firstRow.querySelector('#Title8').innerText = 'Total drilling time ()'
         firstRow.querySelector('#Title9').innerText = 'Avg. time per pile (h)'
         firstRow.querySelector('#Title10').innerText = 'Avg. cost per pile (DKK)'
         firstRow.querySelector('#Title11').innerText = 'Avg. CO2 emissions per pile (kg)'
@@ -747,17 +838,17 @@ class ActivitiesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
 
 
         SecondRow.querySelector('#secondData1').innerText = '01-09-22'
-        SecondRow.querySelector('#secondData2').innerText = '60'
-        SecondRow.querySelector('#secondData3').innerText = '22'
+        SecondRow.querySelector('#secondData2').innerText = '30'
+        SecondRow.querySelector('#secondData3').innerText = '5'
         SecondRow.querySelector('#secondData4').innerText = '60.000,00'
-        SecondRow.querySelector('#secondData5').innerText = '40.000,00'
-        SecondRow.querySelector('#secondData6').innerText = '20' //bring it from marks as executed
-        SecondRow.querySelector('#secondData7').innerText = '80'
-        SecondRow.querySelector('#secondData8').innerText = '100'
-        SecondRow.querySelector('#secondData9').innerText = '5'
-        SecondRow.querySelector('#secondData10').innerText = '2.000,00'
-        SecondRow.querySelector('#secondData11').innerText = '5'
-        SecondRow.querySelector('#secondData12').innerText = '100'
+        SecondRow.querySelector('#secondData5').innerText = '6.000,00'
+        SecondRow.querySelector('#secondData6').innerText = '15' //bring it from marks as executed
+        SecondRow.querySelector('#secondData7').innerText = '135'
+        SecondRow.querySelector('#secondData8').innerText = `${(WorkingTime.reduce((a, b) => a + b, 0)).toFixed(2)}`
+        SecondRow.querySelector('#secondData9').innerText = `${(WorkingTime.reduce((a, b) => a + b, 0) / WorkingTime.length).toFixed(2)}`
+        SecondRow.querySelector('#secondData10').innerText = '400,00'
+        SecondRow.querySelector('#secondData11').innerText = `${(Emissiondata.reduce((a, b) => a + b, 0) / Emissiondata.length).toFixed(2)}` //maybe needs to come from the machine data as drilling
+        SecondRow.querySelector('#secondData12').innerText = `${(Emissiondata.reduce((a, b) => a + b, 0)).toFixed(2)}`
         SecondRow.querySelector('#secondData13').innerText = 'Delayed' //(ok/delayed/high emissions) //can it send automatic alert
         SecondRow.querySelector('#secondData13').style.color = 'red' //(ok/delayed/high emissions) //can it send automatic alert
 
@@ -788,6 +879,7 @@ class ActivitiesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
         // button1.onclick()
 
         button2.textContent = 'Simulate activity'
+        button2.id = 'SimulatePiles'
         button2.style.borderRadius = '4px'
         button2.style.cursor = 'pointer'
         button3.textContent = "Piles details"

@@ -9,7 +9,7 @@ import './extensions/ActivitiesOverview.js';
 import './extensions/GeoLocationExtension.js';
 // import './extensions/TestHeatmapwithAirLab.js'; // //needs to be added to device list panel
 // import './extensions/TestHeatmapForArea.js'; //can probably be deleted now
-// import './extensions/TestHeatmapForEarthwork.js'; //needs to be added to piles list panel
+import './extensions/TestHeatmapForEarthwork.js'; //needs to be added to piles list panel
 // import './extensions/DrawLines.js'; //can be deleted now
 // import './extensions/Custompropertypanel.js';
 // import './extensions/MachineSelection.js'; //can be deleted now
@@ -53,7 +53,7 @@ export function initViewer(container) {
                     // 'TestHeatmapwithAirLab', //needs to be added to device list panel
                     // 'TestHeatmapForArea',
                     'ActivitiesOverview',
-                    // 'TestHeatmapForEarthwork', //needs to be added to piles list panel
+                    'TestHeatmapForEarthwork', //needs to be added to piles list panel
                     // 'DrawLinesExtension', //can be deleted now
                     // 'CustomPropertyPanelExtension',
                     // 'MachineSelection', //can be deleted now

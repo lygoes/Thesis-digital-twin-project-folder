@@ -82,7 +82,8 @@ class SpritesExtension extends Autodesk.Viewing.Extension {
         const spriteIconUrl = './extensions/drilling.png';
         const spriteIconUrl2 = './extensions/excavator-2.png';
         // const spriteIconUrl = './extensions/excavator.png';
-        
+       
+
         const style = new DataVizCore.ViewableStyle(
             viewableType,
             spriteColor,
@@ -128,6 +129,10 @@ class SpritesExtension extends Autodesk.Viewing.Extension {
             // console.log('dbids', spritesToUpdate); //dbids are called 10,11,12
             this._extension.invalidateViewables(spritesToUpdate[1], (viewable) => {return { url: spriteIconUrl2 }; })
             let currentIndex = 1;
+            //if I make this update outside of the sprites function, e.g. 
+            //updating only the position data array every minute to a new position
+            //then its fine that I remova all vieweables and add new ones for the 
+            //site sensors list 
             setInterval(() => {
                 this._extension.invalidateViewables(spritesToUpdate[0], (viewable) => { //spritesToUpdate[0] means Im getting only 1db of the array that spritestoupdate return
                     return {   
@@ -168,6 +173,8 @@ class SpritesExtension extends Autodesk.Viewing.Extension {
      
         HideSprites() {
         this._extension.showHideViewables(false, false)
+        //below is for the sensor sprites to activate
+        // this.viewer.unloadExtension("Autodesk.DataVisualization");
     }
     
     ShowSprites() {

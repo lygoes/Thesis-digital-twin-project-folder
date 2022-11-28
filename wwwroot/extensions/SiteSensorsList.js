@@ -57,6 +57,7 @@ class SiteSensorsList extends BaseExtension {
         this._ActivitiesOverviewPanel = null;
         this._extension = null; //heATMAP
         this._isHeatmapShowing = false; //heatmap
+        this.Sprites = null;
 
 
 
@@ -95,7 +96,7 @@ class SiteSensorsList extends BaseExtension {
             this._SiteHeatmapSwitchPanel = new SiteHeatmapSwitchPanel(this.viewer, this.viewer.container, 'SiteHeatmapPanel', 'Site Sensors Heatmap');
         }, 10000)
         this._Button.onClick = () => {
-
+            this.loadSprites()
             this._SensorListPanel.setVisible(!this._SensorListPanel.isVisible());
             this._Button.setState(this._SensorListPanel.isVisible() ? Autodesk.Viewing.UI.Button.State.ACTIVE : Autodesk.Viewing.UI.Button.State.INACTIVE);
             if (this._SensorListPanel.isVisible() && this.viewer.model) {
@@ -171,7 +172,6 @@ class SiteSensorsList extends BaseExtension {
 
 
 
-
     }
 
     onModelLoaded(model) {
@@ -205,6 +205,54 @@ class SiteSensorsList extends BaseExtension {
         // }, 12000) 
     }
 
+     async loadSprites() {
+        console.log('hii')
+        // this.Sprites = await this.viewer.loadExtension("Autodesk.DataVisualization");
+        // const DataVizCore = Autodesk.DataVisualization.Core;
+        // const viewableType = DataVizCore.ViewableType.SPRITE;
+        // const spriteColor = new THREE.Color(0xffffff);
+        // const highlightColor = new THREE.Color(0xffffff);
+        // // const baseURL = "https://shrikedoc.github.io/data-visualization-doc/_static/";
+        // // const spriteIconUrl = '`${baseURL}fan-00.svg`';
+        // const spriteIconUrl = './extensions/drilling.png';
+        // // const spriteIconUrl = './extensions/excavator.png';
+       
+
+        // const style = new DataVizCore.ViewableStyle(
+        //     viewableType,
+        //     spriteColor,
+        //     spriteIconUrl,
+        //     highlightColor,
+        //     spriteIconUrl,
+        //     );
+            
+            
+            
+        //     const viewableData = new DataVizCore.ViewableData();
+        //     viewableData.spriteSize = 58; // Sprites as points of size 24 x 24 pixels
+            
+        //     const myDataList = [
+        //         { position: { x: 0, y: 0, z: 0 } },
+        //         { position: { x: 16.4042, y: 16.4042, z: 0 } },
+        //         // { position: { x: 126.52138962929293, y: 62.02648651411437, z: -10.26402282714838 } }
+                
+                
+        //     ];
+        //     console.log(myDataList);
+            
+            
+        //     myDataList.forEach((myData, index) => {
+        //         const dbId = 20 + index;
+        //         const position = myData.position;
+        //         const viewable = new DataVizCore.SpriteViewable(position, style, dbId);
+                
+        //         viewableData.addViewable(viewable);
+        //         // console.log(viewable.dbId); //this is just to understand how the index is working here, it logs 10, 11 and 12. 
+        //     });
+            
+        //     await viewableData.finish();
+        //     this.Sprites.addViewables(viewableData);
+    }
     async loadHeatmap() {
         // this._extension = await this.viewer.loadExtension("Autodesk.DataVisualization");
 

@@ -1,7 +1,44 @@
 
 
 import { BaseExtension } from './BaseExtension.js';
-import { getLocationObjects } from './data.js'
+import { getLocationObjects, getMachineInfo } from './data.js'
+
+//for storing stuff for machines charts
+let timestamps = []
+let CO2s = []
+let AvgEnginePowers = []
+let maxEnginePowers = []
+let minEnginePowers = []
+let fuelConsump = []
+let AvgdrillRotationSpeeds = []
+let AvgDrivingSpeeds = []
+let AvgDrillingSpeeds = []
+
+let machineInfo = {}
+
+setTimeout(() => {
+ machineInfo = getMachineInfo()
+console.log('machineinfoooooo', machineInfo['OperationTime'])  //gets the object 
+
+
+const positiondata = getLocationObjects();
+positiondata.forEach(i => {
+    timestamps.push(i.timestamp)
+    CO2s.push(i.sumCO2Emission/1000)
+    AvgEnginePowers.push(i.AvgEnginePower)
+    maxEnginePowers.push(i.maxEnginePower)
+    minEnginePowers.push(i.minEnginePower)
+    fuelConsump.push(i['Fuel Consumption'])
+    AvgdrillRotationSpeeds.push(i.AvgdrillRotationSpeed)
+    AvgDrivingSpeeds.push(i.AvgDrivingSpeed)
+    AvgDrillingSpeeds.push(i.AvgDrillingSpeed)
+})
+console.log('timestamps', timestamps)
+console.log('positiondataimported', positiondata)
+
+
+},8000)
+
 
 class MachineInfo extends BaseExtension {
     constructor(viewer, options) {
@@ -9,10 +46,10 @@ class MachineInfo extends BaseExtension {
         // this._barChartButton = null;
         this._barChartPanel = null;
         this._barChartPanel2 = null;
-
-
+        
+        
     }
-
+    
     async load() {
         super.load();
         await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.1/chart.min.js', 'Chart');
@@ -35,41 +72,43 @@ class MachineInfo extends BaseExtension {
         console.log('machine info panel unloaded.');
         return true;
     }
-
+    
     onToolbarCreated() {
-        this._barChartPanel = new MachinesOverviewPanel(this.viewer, this.viewer.container, 'machine-list-panel', 'Machines Overview');
-
+        
         // this._barChartPanel2 = new MachineInfoPanel2(this, 'machine-info-panel2', 'Machines', { x: 500, y: 10 });
-
         this._barChartButton = this.createToolbarButton('machine-info-button', 'https://img.icons8.com/external-nawicon-glyph-nawicon/512/external-excavator-construction-nawicon-glyph-nawicon.png', 'Show Machines Information');
+        setTimeout(() => { //its because needs time to get the machine information
+        this._barChartPanel = new MachinesOverviewPanel(this.viewer, this.viewer.container, 'machine-list-panel', 'Machines Overview');
+    },10000)
         this._barChartButton.onClick = () => {
+            
             this._barChartPanel.setVisible(!this._barChartPanel.isVisible());
             this._barChartButton.setState(this._barChartPanel.isVisible() ? Autodesk.Viewing.UI.Button.State.ACTIVE : Autodesk.Viewing.UI.Button.State.INACTIVE);
             if (this._barChartPanel.isVisible() && this.viewer.model) {
                 // this._barChartPanel.setModel(this.viewer.model);
             }
-
-
+            
+            
             // this._barChartPanel2.setVisible(!this._barChartPanel2.isVisible());
             // this._barChartButton.setState(this._barChartPanel2.isVisible() ? Autodesk.Viewing.UI.Button.State.ACTIVE : Autodesk.Viewing.UI.Button.State.INACTIVE);
             // if (this._barChartPanel2.isVisible() && this.viewer.model) {
-            //     // this._barChartPanel.setModel(this.viewer.model);
-            // }
-
-            if (!this.viewer.isNodeVisible(10740)) {
-                this.viewer.show(10740)
-            } else {
-                this.viewer.hide(10740)
-            }
-
-            if (!this.viewer.isNodeVisible(10677)) {
-                this.viewer.show(10677)
+                //     // this._barChartPanel.setModel(this.viewer.model);
+                // }
+                
+                if (!this.viewer.isNodeVisible(10740)) {
+                    this.viewer.show(10740)
+                } else {
+                    this.viewer.hide(10740)
+                }
+                
+                if (!this.viewer.isNodeVisible(10677)) {
+                    this.viewer.show(10677)
             } else {
                 this.viewer.hide(10677)
             }
-
+            
         };
-
+        
         this._PileDriverChartPanel = new PileDriverDataPanel(this, 'Piledriver-data-panel', 'Datachart Piledriver', { x: 10, y: 10, chartType: 'line' });
         this._ExcavatorChartPanel = new ExcavatorDataPanel(this, 'Excavator-data-panel', 'Datachart Excavator', { x: 10, y: 10, chartType: 'line' });
         if (this._PileDriverChartPanel && this._PileDriverChartPanel.isVisible()) {
@@ -78,7 +117,7 @@ class MachineInfo extends BaseExtension {
         if (this._ExcavatorChartPanel && this._ExcavatorChartPanel.isVisible()) {
             // this._PileDriverChartPanel.setModel(model);
         }
-
+        
         //for updating chart
         const selectElement = this._PileDriverChartPanel.container.querySelector('select.props');
         selectElement.onchange = (event) => {
@@ -86,28 +125,30 @@ class MachineInfo extends BaseExtension {
 
             switch (value) {
                 case 'Power':
+
                     console.log('power maaand'); //will update graph with avg. max, min, engine power data
-                    this._PileDriverChartPanel.chart.data.datasets[0].data = [300, 200, 500, 600, 400, 100]; //CO2
+                    this._PileDriverChartPanel.chart.data.labels = timestamps //CO2
+                    this._PileDriverChartPanel.chart.data.datasets[0].data = AvgEnginePowers; //CO2
                     this._PileDriverChartPanel.chart.data.datasets[0].label = 'Avg. Power' //CO2
-                   this._PileDriverChartPanel.chart.data.datasets[1].label = 'Min. Power' 
-                   this._PileDriverChartPanel.chart.data.datasets[1].data = [200, 100, 400, 400, 500, 100];
+                    this._PileDriverChartPanel.chart.data.datasets[1].label = 'Min. Power' 
+                   this._PileDriverChartPanel.chart.data.datasets[1].data = minEnginePowers;
                    this._PileDriverChartPanel.chart.data.datasets[2].label = 'Max. Power' 
-                    this._PileDriverChartPanel.chart.data.datasets[2].data = [400, 300, 600, 800, 700, 300]; 
+                   this._PileDriverChartPanel.chart.data.datasets[2].data = maxEnginePowers; 
                   this._PileDriverChartPanel.chart.update();
-                    
-                    break;
-                    case 'Emissions':
+                  
+                  break;
+                  case 'Emissions':
                         console.log('Emissions maaand');//will update graph with CO2, PM and NO2 emissions
-                        this._PileDriverChartPanel.chart.data.datasets[0].data = [30,50,60,40,20,10]; //CO2
+                        this._PileDriverChartPanel.chart.data.datasets[0].data = CO2s; //CO2
                         this._PileDriverChartPanel.chart.data.datasets[0].label = 'CO2' //CO2
                         this._PileDriverChartPanel.chart.data.datasets[1].label = 'NO2' 
-                        this._PileDriverChartPanel.chart.data.datasets[1].data = [20,40,60,70,80,20];
+                        this._PileDriverChartPanel.chart.data.datasets[1].data = [];
                         this._PileDriverChartPanel.chart.data.datasets[2].label = 'PM' 
-                        this._PileDriverChartPanel.chart.data.datasets[2].data = [10,30,40,20,40,30]; 
+                        this._PileDriverChartPanel.chart.data.datasets[2].data = []; 
                         this._PileDriverChartPanel.chart.update();
-                    break;
-                case 'Fuel':
-                    this._PileDriverChartPanel.chart.data.datasets[0].data = [20,30,50,80,70,40]; //CO2
+                        break;
+                        case 'Fuel':
+                            this._PileDriverChartPanel.chart.data.datasets[0].data = fuelConsump; //CO2
                     this._PileDriverChartPanel.chart.data.datasets[0].label = 'Fuel' //CO2
                     this._PileDriverChartPanel.chart.data.datasets[1].label = '' 
                     this._PileDriverChartPanel.chart.data.datasets[1].data = [];
@@ -118,21 +159,21 @@ class MachineInfo extends BaseExtension {
                     this._PileDriverChartPanel.chart.update();
                     console.log('Fuel maaand');
                     break;
-                case 'Speeds':
-                    this._PileDriverChartPanel.chart.data.datasets[0].data = [20,30,50,80,70,40];
-                    this._PileDriverChartPanel.chart.data.datasets[0].label = 'Drilling speed' 
+                    case 'Speeds':
+                        this._PileDriverChartPanel.chart.data.datasets[0].data = AvgDrillingSpeeds;
+                        this._PileDriverChartPanel.chart.data.datasets[0].label = 'Drilling speed' 
                     this._PileDriverChartPanel.chart.data.datasets[1].label = 'Drill rotation speed' 
-                    this._PileDriverChartPanel.chart.data.datasets[1].data = [30,40,50,30,20,10];
+                    this._PileDriverChartPanel.chart.data.datasets[1].data = AvgdrillRotationSpeeds;
                     this._PileDriverChartPanel.chart.data.datasets[2].label = 'Driving speed' 
-                    this._PileDriverChartPanel.chart.data.datasets[2].data = [0,0,0,0,0,0]; 
+                    this._PileDriverChartPanel.chart.data.datasets[2].data = AvgDrivingSpeeds; 
                     this._PileDriverChartPanel.chart.update();
                     console.log('Speeds maaand');
                     break;
-                default:
-                    break;
-            }
+                    default:
+                        break;
+                    }
         }
-
+        
     }
 
     onModelLoaded(model) {
@@ -141,32 +182,57 @@ class MachineInfo extends BaseExtension {
         if (this._barChartPanel && this._barChartPanel.isVisible()) {
             // this._barChartPanel.setModel(model);
         }
-
-
-             //creating a bounding box around the machine
-             const geometry = new THREE.BoxGeometry( 32, 32, 70 );
-             const material = new THREE.MeshBasicMaterial({
-                 color: new THREE.Color(0x7FFF00),
-                 opacity: 0.75,
-                 transparent: true,
-                 side: THREE.DoubleSide,
-                 wireframe: true,
-                 wireframeLinewidth: 1
-             });
+        
+        
+        //  //creating a bounding box around the machine
+        //  const geometry = new THREE.BoxGeometry( 32, 32, 70 );
+        //  const geometry = new THREE.SphereGeometry( 16.4, 64, 32 );
+        //  const material = new THREE.MeshBasicMaterial({
+        //          color: new THREE.Color(0x7FFF00),
+        //          opacity: 0.75,
+        //          transparent: true,
+        //          side: THREE.DoubleSide,
+        //          wireframe: true,
+        //          wireframeLinewidth: 1
+        //      });
              
              
-             let cube = new THREE.Mesh( geometry, material );
-             //    cube.position.set(67, -19, 20)
-             cube.position.set(103,29, 20)
-             //    cube.rotateZ(70)
+        //      let cube = new THREE.Mesh( geometry, material );
+        //      //    cube.position.set(67, -19, 20)
+        //      cube.position.set(115.51820621180504,20.68776596335374, -16.82691266387701)
+        //      //    cube.rotateZ(70)
              
-             this.viewer.impl.createOverlayScene(
-                 'myOverlay2', material)
+        //      this.viewer.impl.createOverlayScene(
+        //          'myOverlay2', material)
                  
-                 this.viewer.impl.addOverlay (
-                     'myOverlay2', cube)
+        //          this.viewer.impl.addOverlay (
+        //              'myOverlay2', cube)
                 
-               this.viewer.impl.invalidate (true)
+        //        this.viewer.impl.invalidate (true)
+
+        //        const geometry2 = new THREE.SphereGeometry( 1.968, 64, 32 );
+        //        const material2 = new THREE.MeshBasicMaterial({
+        //                color: new THREE.Color(0x7FFF00),
+        //                opacity: 0.75,
+        //                transparent: true,
+        //                side: THREE.DoubleSide,
+        //                wireframe: true,
+        //                wireframeLinewidth: 1
+        //            });
+                   
+                   
+        //            let cube2 = new THREE.Mesh( geometry2, material2 );
+        //            //    cube.position.set(67, -19, 20)
+        //            cube2.position.set(131.89898681640625,23.723012924194336, -16.8774049118042)
+        //            //    cube.rotateZ(70)
+                   
+        //            this.viewer.impl.createOverlayScene(
+        //                'myOverlay3', material2)
+                       
+        //                this.viewer.impl.addOverlay (
+        //                    'myOverlay3', cube2)
+                      
+        //              this.viewer.impl.invalidate (true)
     }
 
     async onSelectionChanged(model, dbids) {
@@ -240,16 +306,16 @@ class MachinesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
                   firstRowMachineList.querySelector('#Title2').innerText = 'Type'
                   firstRowMachineList.querySelector('#Title3').innerText = 'Specs'
                   firstRowMachineList.querySelector('#Title4').innerText = 'Work start / end'
-                  firstRowMachineList.querySelector('#Title5').innerText = 'Total working hours'
-                  firstRowMachineList.querySelector('#Title6').innerText = 'Drilling hours'
-                  firstRowMachineList.querySelector('#Title7').innerText = 'Idling hours'
-                  firstRowMachineList.querySelector('#Title8').innerText = 'Driving hours'
+                  firstRowMachineList.querySelector('#Title5').innerText = 'Total operation time (min)'
+                  firstRowMachineList.querySelector('#Title6').innerText = 'Drilling time (min)'
+                  firstRowMachineList.querySelector('#Title7').innerText = 'Idling time (min)'
+                  firstRowMachineList.querySelector('#Title8').innerText = 'Driving time (min)' //will change to hours later
                   firstRowMachineList.querySelector('#Title9').innerText = 'Distance travelled (km)'
                   firstRowMachineList.querySelector('#Title10').innerText = 'Total fuel consumed (l)' //tank capacity is 1200 L
-                  firstRowMachineList.querySelector('#Title11').innerText = 'Avg fuel per hour (l)'
+                  firstRowMachineList.querySelector('#Title11').innerText = 'Avg fuel per min (l)' //change per hour later
                   firstRowMachineList.querySelector('#Title12').innerText = 'Total fuel cost (DKK)'
                   firstRowMachineList.querySelector('#Title13').innerText = 'Total CO2 Emissions (kg)'
-                  firstRowMachineList.querySelector('#Title14').innerText = 'Avg. CO2 per hour (kg)'
+                  firstRowMachineList.querySelector('#Title14').innerText = 'Avg. CO2 per min (kg)' //change per hour later
                   firstRowMachineList.querySelector('#Title15').innerText = 'Performance'
         
         const secondRowMachineList = document.createElement('tr');
@@ -268,17 +334,17 @@ class MachinesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
             // secondRowMachineList.querySelector('#data3').innerText = 'Specs'
             secondRowMachineList.querySelector('#data3').innerHTML = '<a href="https://www.bauer.de/export/shared/documents/pdf/bma/datenblatter/BG_Rotary_Drilling_Rig/BG_55_BS_115_RotaryDrilling_Rig_EN_905_871_2.pdf";>Specs</a>'
             secondRowMachineList.querySelector('#data4').innerText = '01-09-22 / 01-12-22'
-            secondRowMachineList.querySelector('#data5').innerText = '38' //Gets length of machine array and divides by 60
-            secondRowMachineList.querySelector('#data6').innerText = '25' //Gets length of array with data as 'drilling' only and divides by 60
-            secondRowMachineList.querySelector('#data7').innerText = '10' //Gets length of array with data as 'idling' only and divides by 60
-            secondRowMachineList.querySelector('#data8').innerText = '3' //Gets length of array with data as 'driving' only and divides by 60
-            secondRowMachineList.querySelector('#data9').innerText = '50' //Gets distance in last object of array
-            secondRowMachineList.querySelector('#data10').innerText = '300'
-            secondRowMachineList.querySelector('#data11').innerText = '7.89' //divides total fuel by total working hours
+            secondRowMachineList.querySelector('#data5').innerText = machineInfo['OperationTime']  // needs to divides by 60 because we get in minutes and show in hours
+            secondRowMachineList.querySelector('#data6').innerText = machineInfo['DrillingTime']  //needs to divide by 60 later. Gets length of array with data as 'drilling' only and divides by 60
+            secondRowMachineList.querySelector('#data7').innerText = machineInfo['IdlingTime']  //needs to divide by 60. Gets length of array with data as 'idling' only and divides by 60
+            secondRowMachineList.querySelector('#data8').innerText = machineInfo['DrivingTime']  //needs to divide by 60. Gets length of array with data as 'driving' only and divides by 60
+            secondRowMachineList.querySelector('#data9').innerText = machineInfo['DistanceTravelled'] //Gets distance in last object of array
+            secondRowMachineList.querySelector('#data10').innerText = machineInfo['TotalFuel']
+            secondRowMachineList.querySelector('#data11').innerText = (machineInfo['TotalFuel'] / machineInfo['OperationTime']).toFixed(2)  //divides total fuel by total working hours
             secondRowMachineList.querySelector('#data12').innerText = '4500,00' //multiplies total fuel consumption by diesel cost per litre DKK15 today
-            secondRowMachineList.querySelector('#data13').innerText = '300'
-            secondRowMachineList.querySelector('#data14').innerText = '7.89'
-            secondRowMachineList.querySelector('#data15').innerText = 'Excessive idling' //function that if avg hours/CO2 per hour/fuel exceeds desired amount it says high hours/CO2 emissions/high fuel consumption
+            secondRowMachineList.querySelector('#data13').innerText = (machineInfo['TotalCO2'] / 1000).toFixed(2) // because its in kg
+            secondRowMachineList.querySelector('#data14').innerText = ((machineInfo['TotalCO2']/1000) / machineInfo['OperationTime']).toFixed(2)
+            secondRowMachineList.querySelector('#data15').innerText = 'Excessive CO2 emissions' //function that if avg hours/CO2 per hour/fuel exceeds desired amount it says high hours/CO2 emissions/high fuel consumption
             secondRowMachineList.querySelector('#data15').style.color = 'red'
 
             secondRowMachineList.querySelector('#data1').addEventListener('click', () => {
@@ -299,17 +365,17 @@ class MachinesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
             thirdRowMachineList.querySelector('#data3').innerText = 'Specs'
             thirdRowMachineList.querySelector('#data3').innerHTML = '<a href="https://www.hitachicm.eu/wp-content/uploads/2018/08/KA-EN283EU.pdf";>Specs</a>'
             thirdRowMachineList.querySelector('#data4').innerText = '20-11-22 / 20-12-23'
-            thirdRowMachineList.querySelector('#data5').innerText = '50' //Gets length of machine array and divides by 60
-            thirdRowMachineList.querySelector('#data6').innerText = '25' //Gets length of array with data as 'drilling' only and divides by 60
-            thirdRowMachineList.querySelector('#data7').innerText = '15' //Gets length of array with data as 'idling' only and divides by 60
-            thirdRowMachineList.querySelector('#data8').innerText = '10' //Gets length of array with data as 'driving' only and divides by 60
-            thirdRowMachineList.querySelector('#data9').innerText = '100' //Gets distance in last object of array
-            thirdRowMachineList.querySelector('#data10').innerText = '500'
-            thirdRowMachineList.querySelector('#data11').innerText = '10' //divides total fuel by total working hours
-            thirdRowMachineList.querySelector('#data12').innerText = '7500,00' //multiplies total fuel consumption by diesel cost per litre DKK15 today
-            thirdRowMachineList.querySelector('#data13').innerText = '500'
-            thirdRowMachineList.querySelector('#data14').innerText = '10'
-            thirdRowMachineList.querySelector('#data15').innerText = 'Excessive CO2 ' //function that if avg hours/CO2 per hour/fuel exceeds desired amount it says high hours/CO2 emissions/high fuel consumption
+            thirdRowMachineList.querySelector('#data5').innerText = '-' //Gets length of machine array and divides by 60
+            thirdRowMachineList.querySelector('#data6').innerText = '-' //Gets length of array with data as 'drilling' only and divides by 60
+            thirdRowMachineList.querySelector('#data7').innerText = '-' //Gets length of array with data as 'idling' only and divides by 60
+            thirdRowMachineList.querySelector('#data8').innerText = '-' //Gets length of array with data as 'driving' only and divides by 60
+            thirdRowMachineList.querySelector('#data9').innerText = '-' //Gets distance in last object of array
+            thirdRowMachineList.querySelector('#data10').innerText = '-'
+            thirdRowMachineList.querySelector('#data11').innerText = '-' //divides total fuel by total working hours
+            thirdRowMachineList.querySelector('#data12').innerText = '-' //multiplies total fuel consumption by diesel cost per litre DKK15 today
+            thirdRowMachineList.querySelector('#data13').innerText = '-'
+            thirdRowMachineList.querySelector('#data14').innerText = '-'
+            thirdRowMachineList.querySelector('#data15').innerText = '- ' //function that if avg hours/CO2 per hour/fuel exceeds desired amount it says high hours/CO2 emissions/high fuel consumption
             //if function that depending on status color writes in red
             thirdRowMachineList.querySelector('#data15').style.color = 'red'
            
@@ -448,9 +514,12 @@ class PileDriverDataPanel extends Autodesk.Viewing.UI.DockingPanel {
         this.closer = this.createCloseButton();
         this.initializeMoveHandlers(this.title);
         this.initializeCloseHandler(this.closer);
+        this.footer = this.createFooter(); //to resize container
         this.container.appendChild(this.title);
         this.container.appendChild(this.closer);
+        this.container.appendChild(this.footer);
         this.content = document.createElement('div');
+        this.content.style.overflow = 'scroll'
         this.content.style.height = '350px';
         this.content.style.backgroundColor = 'white';
         this.content.innerHTML = `
@@ -462,7 +531,7 @@ class PileDriverDataPanel extends Autodesk.Viewing.UI.DockingPanel {
             <option value="Speeds">Speeds</option>
         </select>
         </div>
-        <div class="chart-container" style="position: relative; height: 325px; padding: 0.5em;">
+        <div class="chart-container" style="position: relative; overflow-x: scroll; width:700px; height: 300px; padding: 0.5em;">
         <canvas class="chart"></canvas>
         </div>
         `;
