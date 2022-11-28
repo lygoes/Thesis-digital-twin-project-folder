@@ -1,6 +1,8 @@
 
 import { BaseExtension } from './BaseExtension.js';
-import myJsondata from './mypath1.json' assert {type: 'json'};
+// import myJsondata from './mypath1.json' assert {type: 'json'};
+import myJsondata from './test2-DataFiltered-Minute.json' assert {type: 'json'};
+
 
 //array and function for storing data with position converted
 const PositionData = [];
@@ -9,9 +11,16 @@ export function getLocationObjects() {
     return PositionData;
 }
 
+//for exporting the machineInfo object
+const DataMachineInfo = []
+
+export function getMachineInfo () {
+    return DataMachineInfo[0]
+}
+
 //inputs for Machine Bbox based on machine position data (Lmv)
-const Incx = 16.4042; //needs to be in ft to work in the viewer - 5 meters equals 16.4 meters
-const Incy = 16.4042;
+const Incx = 13.4042; //needs to be in ft to work in the viewer - 5 meters equals 16.4 meters
+const Incy = 13.4042; //5 METERS IS 16,4 FEET
 const Incz = Math.hypot(Incx, Incy); //this is wrong, doesn't need hypot, fix itt
 
 
@@ -26,6 +35,9 @@ for (let i = 0; i < dataBboxespiles.length; i++) {
     dataBboxespiles[i] = []
     // dataBboxespiles[i].push(nameofPiles[i]) //for naming if wanted.
         }
+    
+const spheresPiles = []
+
 
 
 //Array for storing arrays with Emission values
@@ -83,14 +95,21 @@ export function getDataforPiles() {
                 this.viewer.select(element, Autodesk.Viewing.SelectionMode.REGULAR)
                 const box = this.viewer.utilities.getBoundingBox(false);
                 Bboxespiles.push(box)
+                const centerbox = box.getCenter()
+                const newCenterBox = new THREE.Vector3(centerbox.x, centerbox.y, centerbox.z + 22.9647)
+                const SphereBox = new THREE.Sphere(newCenterBox, 1.968)
+                console.log('centerbox', centerbox)
+                console.log('newcenterbox', newCenterBox)
+                spheresPiles.push(SphereBox)
+
             });
             console.log('boxes', Bboxespiles)
             console.log('dataBboxpiles', dataBboxespiles)
-        
+            console.log(spheresPiles)
         
         this.geoTool = await this.viewer.loadExtension('Autodesk.Geolocation');
         const data = myJsondata; //if I set Interval here to read the data every 3sec it would be like real time data?
-        
+        console.log('dataaaaa', data)
         const MachineBboxData = []
         data.forEach(i => {
             i.vector = new THREE.Vector3(i.y, i.x, i.z)
@@ -103,10 +122,39 @@ export function getDataforPiles() {
             const bbox_min = new THREE.Vector3(i.Lmv.x - Incx, i.Lmv.y - Incy, i.Lmv.z - Incz)
             const bbox_max = new THREE.Vector3(i.Lmv.x + Incx, i.Lmv.y + Incy, i.Lmv.z + Incz)
             i.bbox = new THREE.Box3 (bbox_min, bbox_max);
+            i.sphere = new THREE.Sphere(i.Lmv, 16.4)
             MachineBboxData.push(i)
+
         });
         console.log('Position data' ,PositionData); 
         
+        //for creating an object with machine information 
+        const MachineTotalCO2 = []
+        const MachineTotalFuel = []
+        const DistanceTravelled = []
+        PositionData.forEach(i => {
+            MachineTotalCO2.push(i.sumCO2Emission)
+            MachineTotalFuel.push(i['Fuel Consumption'])
+            DistanceTravelled.push(i['Distance travelled'])
+        })
+
+        const countIdling = PositionData.filter((obj) => obj.Status === 'Idling').length;
+        const countDriving = PositionData.filter((obj) => obj.Status === 'Driving').length;
+        const countDrilling = PositionData.filter((obj) => obj.Status === 'Working').length;
+
+        const MachineInfo = {
+            OperationTime: PositionData.length,
+            IdlingTime: countIdling,
+            DrillingTime: countDrilling,
+            DrivingTime: countDriving,
+            TotalCO2: MachineTotalCO2.reduce((a,b) => a + b, 0),
+            TotalFuel: MachineTotalFuel.reduce((a,b) => a + b, 0), 
+            DistanceTravelled: DistanceTravelled[PositionData.length-1] //BECAUSE LENGTH is 4 but we want the last index which is 3
+        };
+        DataMachineInfo.push(MachineInfo)
+        console.log('machineeeeeee', MachineInfo)
+
+
         
         //BELOW WAS MOVED TO THE LOOP ABOVE FOR TRYIGN TO OPTIMIZE TIME, if with a bgi array it takes too long moves back
         //creates Bbox for each position data -  
@@ -120,21 +168,39 @@ export function getDataforPiles() {
 
         //segreggates data for each pile based on machine bbox
         for (let i = 0; i < Bboxespiles.length; i++) {
-            MachineBboxData.forEach(obj => { if (obj.bbox.intersectsBox(Bboxespiles[i])=== true) {
-                dataBboxespiles[i].push(obj)
-                }}
-                )};
-                console.log('dataBbox1', dataBboxespiles[0]);
-                console.log('dataBbox2', dataBboxespiles[1]);
-                console.log('dataBbox13', dataBboxespiles[13]);
-                console.log('dataBbox4', dataBboxespiles[14]);
+            // MachineBboxData.forEach(obj => { if (obj.bbox.intersectsBox(Bboxespiles[i])=== true) {
+            //     dataBboxespiles[i].push(obj)
+            //     }}
+            //     )
+                MachineBboxData.forEach(obj => { if (obj.sphere.intersectsSphere(spheresPiles[i])=== true) {
+                    dataBboxespiles[i].push(obj)
+                    }}
+                    )
+            };
+                // console.log('dataBbox1', dataBboxespiles[0]);
+
         // add emissions data
         dataBboxespiles.forEach(i => {
-            const timeWorkingonPile = i.length 
-            const KeyFactorCO2= 0.5; //second
-            i.WorkingTime = timeWorkingonPile
-            i.EmissionPerSecond=KeyFactorCO2
-            i.TotalEmissions = timeWorkingonPile*KeyFactorCO2
+            // // const timeWorkingonPile = i.length 
+            // // const KeyFactorCO2= 0.5; //second
+            // // // i.WorkingTime = timeWorkingonPile
+            // // i.EmissionPerSecond=KeyFactorCO2
+            // // i.TotalEmissions = timeWorkingonPile*KeyFactorCO2
+            i.WorkingTime = i.length / 8 //divides by no. piles it can reach //this is total minutes but if the piles get both idling and drilling, we want drilling time (filter by status)
+           
+            const CO2s = []
+            const AllAvgPowers = []
+            const AllAvgSpeeds = []
+            i.forEach(obj => {
+                CO2s.push(obj.sumCO2Emission)
+                //needs to divide working time by no. of piles the machine can reach with if condition that if
+           //machine is within any of the corners, divides by double e.g. if obj.machineBbox intersects (or contains a smaller corner Bbox) any of corners Bbox, sumCO2emission divides by 10
+                AllAvgPowers.push(obj.AvgEnginePower)
+                AllAvgSpeeds.push(obj.AvgDrillingSpeed)
+            })
+            i.SumCO2 = CO2s.reduce((a,b) => a + b, 0) /8 //this is total sum but we need to divide by no. of piles machine can reach
+            i.AvgPower = AllAvgPowers.reduce((a,b) => a + b, 0) / AllAvgPowers.length 
+            i.AvgSpeed = AllAvgSpeeds.reduce((a,b) => a + b, 0) / AllAvgSpeeds.length 
             DataBboxespilesEmissions.push(i)
         });
         console.log('DataBboxespiles with Emissions', DataBboxespilesEmissions);
