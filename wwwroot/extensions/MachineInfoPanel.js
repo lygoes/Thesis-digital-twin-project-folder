@@ -78,8 +78,9 @@ class MachineInfo extends BaseExtension {
         // this._barChartPanel2 = new MachineInfoPanel2(this, 'machine-info-panel2', 'Machines', { x: 500, y: 10 });
         this._barChartButton = this.createToolbarButton('machine-info-button', 'https://img.icons8.com/external-nawicon-glyph-nawicon/512/external-excavator-construction-nawicon-glyph-nawicon.png', 'Show Machines Information');
         setTimeout(() => { //its because needs time to get the machine information
-        this._barChartPanel = new MachinesOverviewPanel(this.viewer, this.viewer.container, 'machine-list-panel', 'Machines Overview');
-    },10000)
+            this._barChartPanel = new MachinesOverviewPanel(this.viewer, this.viewer.container, 'machine-list-panel', 'Machines Overview');
+            this._MachineSimulationPanel = new MachineSimulationPanel(this.viewer, this.viewer.container, 'machine-simulate-panel', 'Machines Forecasting');
+        },10000)
         this._barChartButton.onClick = () => {
             
             this._barChartPanel.setVisible(!this._barChartPanel.isVisible());
@@ -103,21 +104,29 @@ class MachineInfo extends BaseExtension {
                 
                 if (!this.viewer.isNodeVisible(10677)) {
                     this.viewer.show(10677)
-            } else {
-                this.viewer.hide(10677)
-            }
+                } else {
+                    this.viewer.hide(10677)
+                }
+                
+                //for openign simulate button
+                this._barChartPanel.content.querySelector('#machinesimulatebutton').addEventListener('click', () => {
+                    
+                    this._MachineSimulationPanel.setVisible(!this._MachineSimulationPanel.isVisible());
+                    
+                })
+           
+                };
             
-        };
-        
-        this._PileDriverChartPanel = new PileDriverDataPanel(this, 'Piledriver-data-panel', 'Datachart Piledriver', { x: 10, y: 10, chartType: 'line' });
-        this._ExcavatorChartPanel = new ExcavatorDataPanel(this, 'Excavator-data-panel', 'Datachart Excavator', { x: 10, y: 10, chartType: 'line' });
-        if (this._PileDriverChartPanel && this._PileDriverChartPanel.isVisible()) {
-            // this._PileDriverChartPanel.setModel(model);
+            this._PileDriverChartPanel = new PileDriverDataPanel(this, 'Piledriver-data-panel', 'Datachart Piledriver', { x: 10, y: 10, chartType: 'line' });
+            this._ExcavatorChartPanel = new ExcavatorDataPanel(this, 'Excavator-data-panel', 'Datachart Excavator', { x: 10, y: 10, chartType: 'line' });
+            if (this._PileDriverChartPanel && this._PileDriverChartPanel.isVisible()) {
+                // this._PileDriverChartPanel.setModel(model);
         }
         if (this._ExcavatorChartPanel && this._ExcavatorChartPanel.isVisible()) {
             // this._PileDriverChartPanel.setModel(model);
         }
-        
+ 
+
         //for updating chart
         const selectElement = this._PileDriverChartPanel.container.querySelector('select.props');
         selectElement.onchange = (event) => {
@@ -174,7 +183,8 @@ class MachineInfo extends BaseExtension {
                     }
         }
         
-    }
+
+}
 
     onModelLoaded(model) {
         super.onModelLoaded(model);
@@ -408,6 +418,8 @@ class MachinesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
             machineButtonsCell3.appendChild(machineButton3)
             // machineButton3.innerHTML = '<a href="mailto:goes.lylian@gmail.com" style="text-decoration:none; color:red">Send alert</a>'
             machineButton3.innerHTML = '<a href="mailto:goes.lylian@gmail.com" style="text-decoration:none; color:black">Send alert</a>'
+            machineButton3.innerHTML = '<a href="mailto:teizerj@dtu.dk?subject=Daily report use of machines on site&body=Drillin rig was operated for 13 minutes (10 min drilling) and produced 26.26 kg of CO2 emissions" style="text-decoration:none; color:black">Send report/alert</a>'
+            
             machineButton3.style.borderRadius = '4px'
             machineButton3.style.cursor = 'pointer'
             // button1.onclick()
@@ -433,6 +445,8 @@ class MachinesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
         machineButton2.textContent = 'Simulate performance'
         machineButton2.style.borderRadius = '4px'
         machineButton2.style.cursor = 'pointer'
+        machineButton2.id = 'machinesimulatebutton'
+
             this.content.appendChild(machineButtonstable)
             
             this.scrollContainer.appendChild(this.content); //content needs to go inside scroll container
@@ -493,6 +507,72 @@ class MachinesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
     
     Autodesk.Viewing.theExtensionManager.registerExtension('MachineInfoPanel', MachineInfo);
 
+
+    class MachineSimulationPanel extends Autodesk.Viewing.UI.PropertyPanel {
+        constructor(viewer, container, id, title, options) {
+            super(container, id, title, options);
+            this.viewer = viewer;
+            this.container.style.height = "500px";
+            this.container.style.width = "300px";
+            //  this.scrollContainer.style.width = "auto";
+            // this.scrollContainer.style.height = "auto";
+            // this.scrollContainer.style.resize = "auto";
+    
+    
+    
+            this.content = document.createElement('div');
+    
+            const forminputs = document.createElement('div')
+    
+            forminputs.innerHTML = `
+    <FORM>
+    <label for="machine">Machine ID:</label>
+    <input type="text" id="machine" name="machine"><br><br>
+    <label for="hours">No. Operation Hours:</label>
+    <input type="text" id="hours" name="hours"><br><br>
+    </FORM>
+    `
+    const buttonforSimulate = document.createElement('button')
+    buttonforSimulate.innerText = 'Simulate'
+    forminputs.appendChild(buttonforSimulate)
+    buttonforSimulate.addEventListener('click', () => {
+    
+                var FieldValue = document.getElementById("hours").value;
+    
+                if (isNaN(FieldValue) | FieldValue == "") {
+                    var OutputValue = document.getElementById("outputfield");
+                    while (OutputValue.firstChild) OutputValue.removeChild(OutputValue.firstChild)
+                    var ErrorMessage = document.createTextNode("Incorrect or no content in the input field. Note: The system uses . (dot) as decimal separator!");
+                    OutputValue.appendChild(ErrorMessage);
+                }
+    
+                else { //WRITES another IF condition here depending on type of machine
+                    var OutputValue = document.getElementById("outputfield");
+                    while (OutputValue.firstChild) OutputValue.removeChild(OutputValue.firstChild)
+                    // var Result = document.createTextNode(FieldValue*3);
+                    var result = FieldValue * 2.02 *60
+                    var TextResult = `Expected CO2 Emissions for ${FieldValue} hours of operation based on current data is ${result} kgs of CO2 `
+                    var text = document.createTextNode(TextResult);
+                    // var Result = document.createTextNode(Math.pow(FieldValue,2));
+                    OutputValue.appendChild(text);
+                }
+    
+            }) 
+        
+    
+            const outputField = document.createElement('div')
+            outputField.id = 'outputfield'
+            
+            forminputs.style.marginLeft = '10px'
+            outputField.style.marginLeft = '10px'
+    
+            this.content.appendChild(forminputs)
+            this.content.appendChild(outputField)
+    
+            this.scrollContainer.appendChild(this.content); //content needs to go inside scroll container
+    
+        }
+    }
 
 //Creates Panel for Drilling Machine
 
