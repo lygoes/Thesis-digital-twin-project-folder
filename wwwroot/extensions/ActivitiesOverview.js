@@ -103,7 +103,7 @@ class ActivitiesOverview extends BaseExtension {
         setTimeout(() => { //needs the timeout else it creates panel as soon as creates the toolbar. Unless changes
             this._ActivitiesOverviewPanel = new ActivitiesOverviewPanel(this.viewer, this.viewer.container, 'ActivitiesOverviewPanel', 'Show Activities Overview');
             this._PileslistPanel = new PilesListPanel(this.viewer, this.viewer.container, 'listPilesPanel', 'Piles list');
-            this._PilesSimulationPanel = new PilesSimulationPanel(this.viewer, this.viewer.container, 'PilesSimulationPanel', 'Piles simulation');
+            this._PilesSimulationPanel = new PilesSimulationPanel(this.viewer, this.viewer.container, 'PilesSimulationPanel', 'Piles Forecasting');
             this._HeatmapSwitchPanel = new HeatmapSwitchPanel(this, 'piles-heatmap-panel', 'Heatmap Piles', { x: 10, y: 10 });
         }, 10000)
         this._barChartButton.onClick = () => {
@@ -503,7 +503,7 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
         firstRow.querySelector('#Title5').innerText = 'Execution Status' //Finished / in execution /not started
         firstRow.querySelector('#Title6').innerText = 'Avg. Execution Time' //get length of array and divide by number of piles the machine can reach
         firstRow.querySelector('#Title7').innerText = 'Embedded CO2 (kg)' //Fixed value
-        firstRow.querySelector('#Title8').innerText = 'Machine CO2 (kg?)' //get CO2 sum of array and divide by number of piles the machine can reach
+        firstRow.querySelector('#Title8').innerText = 'Machine CO2 (kg)' //get CO2 sum of array and divide by number of piles the machine can reach
         firstRow.querySelector('#Title9').innerText = '' //get CO2 sum of array and divide by number of piles the machine can reach
 
 
@@ -597,27 +597,28 @@ class PilesSimulationPanel extends Autodesk.Viewing.UI.PropertyPanel {
         // this.scrollContainer.style.resize = "auto";
 
 
+
         this.content = document.createElement('div');
 
         const formspace = document.createElement('div')
 
         formspace.innerHTML = `
-<FORM onsubmit="CalculateResult()">
+<FORM>
 <label for="fname">Machine ID:</label>
 <input type="text" id="fname" name="fname"><br><br>
-<label for="lname">No. Operation Hours:</label>
+<label for="lname">No. Piles to drill:</label>
 <input type="text" id="lname" name="lname"><br><br>
-<input type="submit" value="Simulate" class="submit-btn">
+<label for="ame">Diameter of piles:</label>
+<input type="text" id="lname" name="lname"><br><br>
+<label for="me">Length of piles:</label>
+<input type="text" id="lname" name="lname"><br><br>
 </FORM>
-`;
+`
+const buttonsimulate = document.createElement('button')
+buttonsimulate.innerText = 'Simulate'
+formspace.appendChild(buttonsimulate)
+buttonsimulate.addEventListener('click', () => {
 
-// formspace.getElementsByClassName()
-
-
-        function CalculateResult(event) {
-            console.log('CalculateResult');
-            console.log(event);
-            event.preventDefault()
             var FieldValue = document.getElementById("lname").value;
 
             if (isNaN(FieldValue) | FieldValue == "") {
@@ -631,14 +632,15 @@ class PilesSimulationPanel extends Autodesk.Viewing.UI.PropertyPanel {
                 var OutputValue = document.getElementById("OutputValue");
                 while (OutputValue.firstChild) OutputValue.removeChild(OutputValue.firstChild)
                 // var Result = document.createTextNode(FieldValue*3);
-                var result = FieldValue * 3
-                var TextResult = `Expected CO2 Emissions for ${FieldValue} hours of operation based on current data is ${result} kgs of CO2 `
+                var result = FieldValue * 0.2
+                var TextResult = `Expected CO2 Emissions for the execution of ${FieldValue} piles based on current data is ${result} kgs of CO2 `
                 var text = document.createTextNode(TextResult);
                 // var Result = document.createTextNode(Math.pow(FieldValue,2));
                 OutputValue.appendChild(text);
             }
 
-        }
+        }) 
+    
 
         const output = document.createElement('div')
         output.id = 'OutputValue'
@@ -703,7 +705,7 @@ class HeatmapSwitchPanel extends Autodesk.Viewing.UI.DockingPanel {
         //delete the select props for this one 
 
         this.content.innerHTML = `
-            <h1 style="color:red;"> Heatmap Options go here </h1>
+            <h3 style="color:black;"> Heatmap Options go here </h3>
             <div class="props-container" style="position: relative; height: 25px; padding: 0.5em;">
             <select class="props">
                 <option value="CO2">CO2</option>
@@ -814,8 +816,8 @@ class ActivitiesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
         firstRow.querySelector('#Title5').innerText = 'Current cost (DKK)' //Sums fixed + machine cost by time working on piles
         firstRow.querySelector('#Title6').innerText = 'No. piles executed' //based on marking piles as finished
         firstRow.querySelector('#Title7').innerText = 'No. piles to be exec.'
-        firstRow.querySelector('#Title8').innerText = 'Total drilling time ()'
-        firstRow.querySelector('#Title9').innerText = 'Avg. time per pile (h)'
+        firstRow.querySelector('#Title8').innerText = 'Total drilling time (min)'
+        firstRow.querySelector('#Title9').innerText = 'Avg. time per pile (min)'
         firstRow.querySelector('#Title10').innerText = 'Avg. cost per pile (DKK)'
         firstRow.querySelector('#Title11').innerText = 'Avg. CO2 emissions per pile (kg)'
         firstRow.querySelector('#Title12').innerText = 'Total CO2 emissions (kg)'
@@ -842,14 +844,18 @@ class ActivitiesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
         SecondRow.querySelector('#secondData3').innerText = '5'
         SecondRow.querySelector('#secondData4').innerText = '60.000,00'
         SecondRow.querySelector('#secondData5').innerText = '6.000,00'
-        SecondRow.querySelector('#secondData6').innerText = '15' //bring it from marks as executed
-        SecondRow.querySelector('#secondData7').innerText = '135'
-        SecondRow.querySelector('#secondData8').innerText = `${(WorkingTime.reduce((a, b) => a + b, 0)).toFixed(2)}`
-        SecondRow.querySelector('#secondData9').innerText = `${(WorkingTime.reduce((a, b) => a + b, 0) / WorkingTime.length).toFixed(2)}`
+        SecondRow.querySelector('#secondData6').innerText = '16' //bring it from marks as executed
+        SecondRow.querySelector('#secondData7').innerText = '134'
+        // SecondRow.querySelector('#secondData8').innerText = `${(WorkingTime.reduce((a, b) => a + b, 0)).toFixed(2)}`
+        SecondRow.querySelector('#secondData8').innerText = '10'
+        // SecondRow.querySelector('#secondData9').innerText = `${(WorkingTime.reduce((a, b) => a + b, 0) / WorkingTime.length).toFixed(2)}`
+        SecondRow.querySelector('#secondData9').innerText = '0.625'
         SecondRow.querySelector('#secondData10').innerText = '400,00'
-        SecondRow.querySelector('#secondData11').innerText = `${(Emissiondata.reduce((a, b) => a + b, 0) / Emissiondata.length).toFixed(2)}` //maybe needs to come from the machine data as drilling
-        SecondRow.querySelector('#secondData12').innerText = `${(Emissiondata.reduce((a, b) => a + b, 0)).toFixed(2)}`
-        SecondRow.querySelector('#secondData13').innerText = 'Delayed' //(ok/delayed/high emissions) //can it send automatic alert
+        // SecondRow.querySelector('#secondData11').innerText = `${(Emissiondata.reduce((a, b) => a + b, 0) / Emissiondata.length).toFixed(2)}` //maybe needs to come from the machine data as drilling
+        SecondRow.querySelector('#secondData11').innerText = '0.2'
+        // SecondRow.querySelector('#secondData12').innerText = `${(Emissiondata.reduce((a, b) => a + b, 0)).toFixed(2)}`
+        SecondRow.querySelector('#secondData12').innerText = '3.2'
+        SecondRow.querySelector('#secondData13').innerText = 'Excessive CO2' //(ok/delayed/high emissions) //can it send automatic alert
         SecondRow.querySelector('#secondData13').style.color = 'red' //(ok/delayed/high emissions) //can it send automatic alert
 
 
@@ -873,7 +879,8 @@ class ActivitiesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
         cell3.appendChild(button3)
         cell1.appendChild(button1)
         cell4.appendChild(button4)
-        button1.innerHTML = '<a href="mailto:goes.lylian@gmail.com" style="text-decoration:none; color:black">Send alert</a>'
+        // button1.innerHTML = '<a href="mailto:goes.lylian@gmail.com" style="text-decoration:none; color:black">Send alert</a>'
+        button1.innerHTML = '<a href="mailto:teizerj@dtu.dk?subject=Daily report site activities&body=15 piles executed, total CO2 emissions is 3.2 kg " style="text-decoration:none; color:black">Send report/alert</a>'
         button1.style.borderRadius = '4px'
         button1.style.cursor = 'pointer'
         // button1.onclick()
