@@ -43,9 +43,7 @@ console.log('positiondataimported', positiondata)
 class MachineInfo extends BaseExtension {
     constructor(viewer, options) {
         super(viewer, options);
-        // this._barChartButton = null;
-        this._barChartPanel = null;
-        this._barChartPanel2 = null;
+        this._MachineOverviewPanel = null;
         
         
     }
@@ -54,48 +52,40 @@ class MachineInfo extends BaseExtension {
         super.load();
         await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.1/chart.min.js', 'Chart');
         Chart.defaults.plugins.legend.display = true;
-        // console.log('machine info panel loaded.');
         return true;
     }
 
     unload() {
         super.unload();
-        for (const button of [this._barChartButton]) {
+        for (const button of [this._machineInfoButton]) {
             this.removeToolbarButton(button);
         }
-        this._barChartButton = null;
-        for (const panel of [this._barChartPanel]) {
+        this._machineInfoButton = null;
+        for (const panel of [this._MachineOverviewPanel]) {
             panel.setVisible(false);
             panel.uninitialize();
         }
-        this._barChartPanel = null;
+        this._MachineOverviewPanel = null;
         console.log('machine info panel unloaded.');
         return true;
     }
     
-    onToolbarCreated() {
-        
-        // this._barChartPanel2 = new MachineInfoPanel2(this, 'machine-info-panel2', 'Machines', { x: 500, y: 10 });
-        this._barChartButton = this.createToolbarButton('machine-info-button', 'https://img.icons8.com/external-nawicon-glyph-nawicon/512/external-excavator-construction-nawicon-glyph-nawicon.png', 'Show Machines Information');
+    onToolbarCreated() {        
+        this._machineInfoButton = this.createToolbarButton('machine-info-button', 'https://img.icons8.com/external-nawicon-glyph-nawicon/512/external-excavator-construction-nawicon-glyph-nawicon.png', 'Show Machines Information');
         setTimeout(() => { //its because needs time to get the machine information
-            this._barChartPanel = new MachinesOverviewPanel(this.viewer, this.viewer.container, 'machine-list-panel', 'Machines Overview');
+            this._MachineOverviewPanel = new MachinesOverviewPanel(this.viewer, this.viewer.container, 'machine-list-panel', 'Machines Overview');
             this._MachineSimulationPanel = new MachineSimulationPanel(this.viewer, this.viewer.container, 'machine-simulate-panel', 'Machines Forecasting');
         },10000)
-        this._barChartButton.onClick = () => {
+        this._machineInfoButton.onClick = () => {
             
-            this._barChartPanel.setVisible(!this._barChartPanel.isVisible());
-            this._barChartButton.setState(this._barChartPanel.isVisible() ? Autodesk.Viewing.UI.Button.State.ACTIVE : Autodesk.Viewing.UI.Button.State.INACTIVE);
-            if (this._barChartPanel.isVisible() && this.viewer.model) {
-                // this._barChartPanel.setModel(this.viewer.model);
+            this._MachineOverviewPanel.setVisible(!this._MachineOverviewPanel.isVisible());
+            
+            this._machineInfoButton.setState(this._MachineOverviewPanel.isVisible() ? Autodesk.Viewing.UI.Button.State.ACTIVE : Autodesk.Viewing.UI.Button.State.INACTIVE);
+            if (this._MachineOverviewPanel.isVisible() && this.viewer.model) {
+                // this._MachineOverviewPanel.setModel(this.viewer.model);
             }
             
-            
-            // this._barChartPanel2.setVisible(!this._barChartPanel2.isVisible());
-            // this._barChartButton.setState(this._barChartPanel2.isVisible() ? Autodesk.Viewing.UI.Button.State.ACTIVE : Autodesk.Viewing.UI.Button.State.INACTIVE);
-            // if (this._barChartPanel2.isVisible() && this.viewer.model) {
-                //     // this._barChartPanel.setModel(this.viewer.model);
-                // }
-                
+
                 if (!this.viewer.isNodeVisible(10740)) {
                     this.viewer.show(10740)
                 } else {
@@ -109,7 +99,7 @@ class MachineInfo extends BaseExtension {
                 }
                 
                 //for openign simulate button
-                this._barChartPanel.content.querySelector('#machinesimulatebutton').addEventListener('click', () => {
+                this._MachineOverviewPanel.content.querySelector('#machinesimulatebutton').addEventListener('click', () => {
                     
                     this._MachineSimulationPanel.setVisible(!this._MachineSimulationPanel.isVisible());
                     
@@ -189,7 +179,7 @@ class MachineInfo extends BaseExtension {
     onModelLoaded(model) {
         super.onModelLoaded(model);
         this.viewer.hide([10740, 10677])
-        if (this._barChartPanel && this._barChartPanel.isVisible()) {
+        if (this._MachineOverviewPanel && this._MachineOverviewPanel.isVisible()) {
             // this._barChartPanel.setModel(model);
         }
         
@@ -250,7 +240,7 @@ class MachineInfo extends BaseExtension {
         if (dbids[0] === 10677) {
             console.log('Pile driver selected');
             this._PileDriverChartPanel.setVisible(!this._PileDriverChartPanel.isVisible());
-            // this._barChartButton.setState(this._PileDriverChartPanel.isVisible() ? Autodesk.Viewing.UI.Button.State.ACTIVE : Autodesk.Viewing.UI.Button.State.INACTIVE);
+            // this._machineInfoButton.setState(this._PileDriverChartPanel.isVisible() ? Autodesk.Viewing.UI.Button.State.ACTIVE : Autodesk.Viewing.UI.Button.State.INACTIVE);
             if (this._PileDriverChartPanel.isVisible() && this.viewer.model) {
                 // this._PileDriverChartPanel.setModel(this.viewer.model);
             }
@@ -258,7 +248,7 @@ class MachineInfo extends BaseExtension {
         if (dbids[0] === 10740) {
             console.log('Excavator selected');
             this._ExcavatorChartPanel.setVisible(!this._ExcavatorChartPanel.isVisible());
-            // this._barChartButton.setState(this._PileDriverChartPanel.isVisible() ? Autodesk.Viewing.UI.Button.State.ACTIVE : Autodesk.Viewing.UI.Button.State.INACTIVE);
+            // this._machineInfoButton.setState(this._PileDriverChartPanel.isVisible() ? Autodesk.Viewing.UI.Button.State.ACTIVE : Autodesk.Viewing.UI.Button.State.INACTIVE);
             if (this._ExcavatorChartPanel.isVisible() && this.viewer.model) {
                 // this._PileDriverChartPanel.setModel(this.viewer.model);
             }
