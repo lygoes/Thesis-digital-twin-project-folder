@@ -123,7 +123,7 @@ class TestHeatmapwithvalue extends Autodesk.Viewing.Extension {
           // Register color stops for the heatmap. Along with the normalized sensor value
         // in the range of [0.0, 1.0], `renderSurfaceShading` will interpolate the final
         // heatmap color based on these specified colors.
-        const sensorColors = [0x0000ff, 0x00ff00, 0xffff00, 0xff0000];
+        const sensorColors = [0x00ff00, 0xffff00, 0xFF0000]; //'#00ff00', '#ffff00', '#FF0000'
         
         // Set heatmap colors for temperature
         const sensorType = "NO2";
