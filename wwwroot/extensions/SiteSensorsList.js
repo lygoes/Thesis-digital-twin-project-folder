@@ -1,5 +1,5 @@
 import { BaseExtension } from './BaseExtension.js';
-import { getDataforPiles } from './data.js';
+import { getDataforPiles } from './DataProcessing.js';
 
 
 //this is used in tables, charts and heatmap - sets the order for clicking on the pile and seeing correct data
@@ -15,7 +15,7 @@ for (let i = 1; i < ListPilesDbIds.length + 1; i++) {
     PilesNames.push(Names)
 }
 
-console.log(PilesNames)
+// console.log(PilesNames)
 
 const SensorPointsNames = []
 for (let i = 1; i < ListPilesDbIds.length + 1; i++) {
@@ -43,7 +43,7 @@ setTimeout(() => {
 
     })
     // console.log('here is the data', dataForallPiles);
-    console.log(Emissiondata)
+    // console.log(Emissiondata)
     // console.log('emission data 0 for test', Emissiondata[0])   
 }, 10000) //not sure if this is needed here because there is another one down there when creating the panels
 

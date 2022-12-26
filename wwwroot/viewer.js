@@ -1,21 +1,15 @@
 /// import * as Autodesk from "@types/forge-viewer";
-import './extensions/data.js';
-// import './extensions/LoggerExtension.js';
+import './extensions/DataProcessing.js';
+import './extensions/LoggerExtension.js';
 import './extensions/SummaryExtension.js';
-import './extensions/SiteSensorsList.js';  //can be deleted now
+import './extensions/SiteSensorsList.js';  
 import './extensions/SpritesExtension.js';
-// import './extensions/PilesHeatmap.js'; //can be deleted if it works
 import './extensions/ActivitiesOverview.js';
 import './extensions/GeoLocationExtension.js';
 // import './extensions/TestHeatmapwithAirLab.js'; // //needs to be added to device list panel
-// import './extensions/TestHeatmapForArea.js'; //can probably be deleted now
-import './extensions/TestHeatmapForEarthwork.js'; //needs to be added to piles list panel
-// import './extensions/DrawLines.js'; //can be deleted now
-// import './extensions/Custompropertypanel.js';
-// import './extensions/MachineSelection.js'; //can be deleted now
+// import './extensions/TestHeatmapForEarthwork.js'; //needs to be added to piles list panel
 import './extensions/AppearObjects.js';
 import './extensions/MachineInfoPanel.js'; 
-// import './extensions/PileslistPanel.js';  //can be deleted now
 
 
 
@@ -42,24 +36,18 @@ export function initViewer(container) {
         Autodesk.Viewing.Initializer({ getAccessToken }, function () {
             const config = {
                 extensions: [
-                    'dataconversion',
+                    'DataProcessing',
                     'Autodesk.DocumentBrowser',
-                    // 'LoggerExtension',
+                    'LoggerExtension',
                     'SummaryExtension',
                     'SiteSensorsList',
                     'SpritesExtension',
-                    // 'PilesHeatmap', //can be deleted if it works
                     'GisToolExtension',
                     // 'TestHeatmapwithAirLab', //needs to be added to device list panel
-                    // 'TestHeatmapForArea',
                     'ActivitiesOverview',
-                    'TestHeatmapForEarthwork', //needs to be added to piles list panel
-                    // 'DrawLinesExtension', //can be deleted now
-                    // 'CustomPropertyPanelExtension',
-                    // 'MachineSelection', //can be deleted now
+                    // 'TestHeatmapForEarthwork', //needs to be added to piles list panel
                     'AppearObjects',
                     'MachineInfoPanel',
-                    // 'PilesListPanel' //can be deleted now
                    
                     
                 ]
@@ -76,7 +64,8 @@ export function loadModel(viewer, urn) { //alter the doc.getroot below if you wa
     return new Promise(function (resolve, reject) {
         function onDocumentLoadSuccess(doc) {
             resolve(viewer.loadDocumentNode(doc, (doc, doc.getRoot().getDefaultGeometry()))); 
-            // resolve(viewer.loadDocumentNode(doc, (doc, doc.getRoot().findByGuid("c884ae1b-61e7-4f9d-0001-719e20b22d0b-0007d852")))); //(doc, doc.getRoot().findByGuid("c884ae1b-61e7-4f9d-0001-719e20b22d0b-0007d852"))); will load the view you want as the first thing.
+            // this is for the test with rooms model // resolve(viewer.loadDocumentNode(doc, (doc, doc.getRoot().findByGuid("c884ae1b-61e7-4f9d-0001-719e20b22d0b-0007d852")))); //(doc, doc.getRoot().findByGuid("c884ae1b-61e7-4f9d-0001-719e20b22d0b-0007d852"))); will load the view you want as the first thing.
+            // resolve(viewer.loadDocumentNode(doc, (doc, doc.getRoot().findByGuid("c884ae1b-61e7-4f9d-0001-719e20b22d0b-0007de1b")))); //(doc, doc.getRoot().findByGuid("c884ae1b-61e7-4f9d-0001-719e20b22d0b-0007d852"))); will load the view you want as the first thing.
         }
         function onDocumentLoadFailure(code, message, errors) {
             reject({ code, message, errors });
