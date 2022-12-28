@@ -630,9 +630,13 @@ class SensorListPanel extends Autodesk.Viewing.UI.PropertyPanel {
 
 
         const sensorList = document.createElement('table');
-        sensorList.style.border = '2px solid black'
         sensorList.style.borderCollapse = 'collapse'
-        sensorList.style.width = '60%'
+        sensorList.style.width = '100%'
+        sensorList.style.maxWidth = '450px'
+        sensorList.style.fontSize = '0.9em'
+        sensorList.style.margin = '10px 10px'
+        sensorList.style.fontFamily = 'sans-serif'
+        sensorList.style.boxShadow = '2px 2px 20px #888888'
 
         this.content.appendChild(sensorList)
 
@@ -643,7 +647,11 @@ class SensorListPanel extends Autodesk.Viewing.UI.PropertyPanel {
             const RowTitleSensorList = document.createElement('td');
             firstRowSensorList.appendChild(RowTitleSensorList)
             RowTitleSensorList.id = 'Title' + [index]
-            RowTitleSensorList.style.border = '2px solid black'
+            RowTitleSensorList.style.backgroundColor = '#ffc20a' //	
+            RowTitleSensorList.style.color = '#000000' //	
+            RowTitleSensorList.style.textAlign = 'center' //	
+            RowTitleSensorList.style.fontWeight = 'bold' //	
+            
         }
 
         firstRowSensorList.querySelector('#Title1').innerText = 'Device'
@@ -658,6 +666,9 @@ class SensorListPanel extends Autodesk.Viewing.UI.PropertyPanel {
 
         for (let index = 0; index < 5; index++) {
             const allRowsSensorList = document.createElement('tr');
+            allRowsSensorList.style.borderBottom = '2px solid #dddddd'
+            allRowsSensorList.style.padding = '5px 5px'
+            allRowsSensorList.style.textAlign = 'center'
             sensorList.appendChild(allRowsSensorList)
             const deviceName = document.createElement('th');
             deviceName.innerText = 'Device' + (index + 1); //use array with device names
@@ -685,7 +696,6 @@ class SensorListPanel extends Autodesk.Viewing.UI.PropertyPanel {
             allRowsSensorList.appendChild(PM)
             allRowsSensorList.appendChild(NOx)
             allRowsSensorList.appendChild(Status)
-            allRowsSensorList.style.textAlign = 'center'
             deviceName.addEventListener('click', () => {
                 //needs to highlight sprite 
                 // this.viewer.select(ListPilesDbIds[index], Autodesk.Viewing.SelectionMode.REGULAR)
@@ -696,10 +706,13 @@ class SensorListPanel extends Autodesk.Viewing.UI.PropertyPanel {
         }
 
         const AirSensorList = document.createElement('table');
-        AirSensorList.style.border = '2px solid black'
         AirSensorList.style.borderCollapse = 'collapse'
-        AirSensorList.style.width = '60%'
-        AirSensorList.style.marginTop = '10px'
+        AirSensorList.style.width = '100%'
+        AirSensorList.style.maxWidth = '450px'
+        AirSensorList.style.fontSize = '0.9em'
+        AirSensorList.style.margin = '10px 10px'
+        AirSensorList.style.fontFamily = 'sans-serif'
+        AirSensorList.style.boxShadow = '2px 2px 20px #888888'
 
         this.content.appendChild(AirSensorList)
 
@@ -710,7 +723,10 @@ class SensorListPanel extends Autodesk.Viewing.UI.PropertyPanel {
             const RowTitleAirSensors = document.createElement('td');
             firstRowAirSensorList.appendChild(RowTitleAirSensors)
             RowTitleAirSensors.id = 'Title' + [index]
-            RowTitleAirSensors.style.border = '2px solid black'
+            RowTitleAirSensors.style.backgroundColor = '#ffc20a' //	
+            RowTitleAirSensors.style.color = '#000000' //	
+            RowTitleAirSensors.style.textAlign = 'center' //	
+            RowTitleAirSensors.style.fontWeight = 'bold' //	
         }
 
         firstRowAirSensorList.querySelector('#Title1').innerText = 'Device'
@@ -725,6 +741,9 @@ class SensorListPanel extends Autodesk.Viewing.UI.PropertyPanel {
 
         for (let index = 0; index < 2; index++) {
             const allRowsAirSensor = document.createElement('tr');
+            allRowsAirSensor.style.borderBottom = '2px solid #dddddd'
+            allRowsAirSensor.style.padding = '5px 5px'
+            allRowsAirSensor.style.textAlign = 'center'
             AirSensorList.appendChild(allRowsAirSensor)
             const deviceName = document.createElement('th');
             deviceName.innerText = 'Device' + (index + 1); //use array with device names
@@ -753,7 +772,7 @@ class SensorListPanel extends Autodesk.Viewing.UI.PropertyPanel {
             allRowsAirSensor.appendChild(Noise)
             allRowsAirSensor.appendChild(TBD)
             allRowsAirSensor.appendChild(Status)
-            allRowsAirSensor.style.textAlign = 'center'
+
             deviceName.addEventListener('click', () => {
                 //needs to highlight sprite 
                 // this.viewer.select(ListPilesDbIds[index], Autodesk.Viewing.SelectionMode.REGULAR)
@@ -766,6 +785,7 @@ class SensorListPanel extends Autodesk.Viewing.UI.PropertyPanel {
 
 
         const tablebuttons = document.createElement('table');
+        tablebuttons.style.padding = '5px 5px'
         const buttonRows = document.createElement('tr');
         tablebuttons.appendChild(buttonRows)
         const cell1 = document.createElement('td')
@@ -784,16 +804,22 @@ class SensorListPanel extends Autodesk.Viewing.UI.PropertyPanel {
         cell2.appendChild(button2)
         cell3.appendChild(button3)
         // cell4.appendChild(button4)
-        button1.innerHTML = '<a href="mailto:goes.lylian@gmail.com" style="text-decoration:none; color:black">Send email</a>'
+        button1.innerHTML = '<a href="mailto:goes.lylian@gmail.com" style="text-decoration:none; color:black">Send report</a>'
         button1.style.borderRadius = '4px'
         button1.style.cursor = 'pointer'
+        button1.style.height = '15px'
 
-        button2.textContent = 'See charts'
+        button2.textContent = 'Charts'
         button2.id = 'ChartsButton'
-        button3.textContent = 'See heatmap'
+        button2.style.borderRadius = '4px'
+        button2.style.cursor = 'pointer'
+        button2.style.height = '15px'
+        button3.textContent = 'Heatmap'
         button3.id = 'HeatmapButton'
-        // button4.id = 'PilesHeatmapButton'
-        // button4.textContent = 'See piles heatmap'
+        button3.style.borderRadius = '4px'
+        button3.style.cursor = 'pointer'
+        button3.style.height = '15px'
+
 
         this.content.appendChild(tablebuttons)
 
