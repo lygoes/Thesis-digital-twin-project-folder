@@ -58,7 +58,9 @@ class SpritesExtension extends Autodesk.Viewing.Extension {
             
             const myDataList = [
                 { position: positiondata[0].Lmv },
-                { position: { x: 176.317125275187, y: 137.68808110566533, z: -16.825702667236328} },
+                // { position: { x: 176.317125275187, y: 137.68808110566533, z: -16.825702667236328} },
+                // { position: { x:112.38093831151251,y:29.759913345881873, z:-16.825702667236328} },
+                // { position: { x:129.71875153892492,y:112.92621569847593,z:-16.825702667236328} },
                 // { position: { x: 0, y: 0, z: 0 } },
                 
             ];
@@ -139,7 +141,7 @@ class SpritesExtension extends Autodesk.Viewing.Extension {
     onToolbarCreated() {
         this._group = this.viewer.toolbar.getControl('dashboard-toolbar-group'); //if it exists it puts here /
         if (!this._group) { // Create a new toolbar group if it doesn't exist
-            this._group = new Autodesk.Viewing.UI.ControlGroup('allMyAwesomeExtensionsToolbar');
+            this._group = new Autodesk.Viewing.UI.ControlGroup('dashboard-toolbar-group');
             this.viewer.toolbar.addControl(this._group);
         }
            

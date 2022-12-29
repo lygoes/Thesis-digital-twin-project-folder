@@ -86,6 +86,12 @@ setTimeout(() => {
     TotalNoPiles = DataBboxespilesEmissions.length
 }, 10000);
 
+//Thresholds for time and emissions per pile
+const CO2perPilethreshold = 2; //kilograms 
+const TimePerPilethreshold = 10; //hours
+const PMperPileThreshold = 2; //grams
+const NOxPerPileThreshold = 20; //grams
+
 class ActivitiesOverview extends BaseExtension {
     constructor(viewer, options) {
         super(viewer, options);
@@ -687,7 +693,7 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
         h1.style.fontSize = '15px'
         h1.style.fontFamily = 'sans-serif'
         const h2 = document.createElement('h1');
-        h2.innerText = '*Execution Times and CO2 Emissions above average appear in red color'
+        h2.innerText = '*Drilling Times and CO2 Emissions above threshold appear in red color'
         h2.style.fontSize = '12px'
         h2.style.fontFamily = 'sans-serif'
         this.content.appendChild(h1)
@@ -722,7 +728,7 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
         firstRow.querySelector('#Title3').innerText = 'Depth'
         firstRow.querySelector('#Title4').innerText = 'D(mm)'
         firstRow.querySelector('#Title5').innerText = 'Execution Status' //Finished / in execution /not started
-        firstRow.querySelector('#Title6').innerText = 'Avg. Execution Time' //get length of array and divide by number of piles the machine can reach
+        firstRow.querySelector('#Title6').innerText = 'Drilling Time (h)' //get length of array and divide by number of piles the machine can reach
         firstRow.querySelector('#Title7').innerText = 'Embedded CO2 (kg)' //Fixed value
         firstRow.querySelector('#Title8').innerText = 'Machine CO2 (kg)' //get CO2 sum of array and divide by number of piles the machine can reach
         firstRow.querySelector('#Title9').innerText = '' //get CO2 sum of array and divide by number of piles the machine can reach
@@ -763,7 +769,7 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
             execTime.innerText = `${(WorkingTime[index]).toFixed(2)}`  //make it so that if this is bigger than a value color in red
             if (WorkingTime[index] == 0) {
                 execTime.innerText = '-'
-            } else if (WorkingTime[index] > 50) {
+            } else if (WorkingTime[index] > TimePerPilethreshold) {
                 execTime.style.color = 'red'
             }
 
@@ -779,7 +785,7 @@ class PilesListPanel extends Autodesk.Viewing.UI.PropertyPanel {
             ButtonFinishedPile.style.maxWidth = '60px'
             ButtonFinishedPile.id = 'buttonFinished'
 
-            if (CO2Emissions[index] > 50) {  //make it so that if this is bigger than a value color in red
+            if (CO2Emissions[index] > CO2perPilethreshold) {  //make it so that if this is bigger than a value color in red
                 machCO2.style.color = 'red'
             }
             allRows.appendChild(topLevel)
@@ -876,10 +882,10 @@ class PilesSimulationPanel extends Autodesk.Viewing.UI.PropertyPanel {
                 while (OutputValue.firstChild) OutputValue.removeChild(OutputValue.firstChild)
                 // var Result = document.createTextNode(FieldValue*3);
 
-                const avgTimeperPile = (((WorkingTime.reduce((a, b) => a + b, 0))) / WorkingTime.length).toFixed(4)
-                const CO2rate = (filteredCO2Emissions.reduce((a, b) => a + b, 0) / filteredCO2Emissions.length).toFixed(2)
-                const PMrate = (filteredPMEmissions.reduce((a, b) => a + b, 0) / filteredPMEmissions.length).toFixed(2)
-                const NOxRate = (filteredNOxEmissions.reduce((a, b) => a + b, 0) / filteredNOxEmissions.length).toFixed(2)
+                const avgTimeperPile = (((WorkingTime.reduce((a, b) => a + b, 0))) / countPilesInExec).toFixed(4)
+                const CO2rate = (filteredCO2Emissions.reduce((a, b) => a + b, 0) / countPilesInExec).toFixed(2)
+                const PMrate = (filteredPMEmissions.reduce((a, b) => a + b, 0) / countPilesInExec).toFixed(2)
+                const NOxRate = (filteredNOxEmissions.reduce((a, b) => a + b, 0) / countPilesInExec).toFixed(2)
                 var resultCO2 = (FieldValue * CO2rate).toFixed(2)
                 var resultPM = (FieldValue * PMrate).toFixed(2)
                 var resultNOx = (FieldValue * NOxRate).toFixed(2)
@@ -924,10 +930,10 @@ class PilesSimulationPanel extends Autodesk.Viewing.UI.PropertyPanel {
             else { //WRITES another IF condition here depending on type of machine
                 var OutputValue2 = document.getElementById("OutputValue2");
                 while (OutputValue2.firstChild) OutputValue2.removeChild(OutputValue2.firstChild)
-                const avgTimeperPile2 = (((WorkingTime.reduce((a, b) => a + b, 0))) / WorkingTime.length).toFixed(4)
-                const CO2rate2 = (filteredCO2Emissions.reduce((a, b) => a + b, 0) / filteredCO2Emissions.length).toFixed(2)
-                const PMrate2 = (filteredPMEmissions.reduce((a, b) => a + b, 0) / filteredPMEmissions.length).toFixed(2)
-                const NOxRate2 = (filteredNOxEmissions.reduce((a, b) => a + b, 0) / filteredNOxEmissions.length).toFixed(2)
+                const avgTimeperPile2 = (((WorkingTime.reduce((a, b) => a + b, 0))) / countPilesInExec).toFixed(4)
+                const CO2rate2 = (filteredCO2Emissions.reduce((a, b) => a + b, 0) / countPilesInExec).toFixed(2)
+                const PMrate2 = (filteredPMEmissions.reduce((a, b) => a + b, 0) / countPilesInExec).toFixed(2)
+                const NOxRate2 = (filteredNOxEmissions.reduce((a, b) => a + b, 0) / countPilesInExec).toFixed(2)
                 var resultCO22 = (FieldValue2 * CO2rate2).toFixed(2)
                 var resultPM2 = (FieldValue2 * PMrate2).toFixed(2)
                 var resultNOx2 = (FieldValue2 * NOxRate2).toFixed(2)
@@ -1140,21 +1146,21 @@ class ActivitiesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
         SecondRow.querySelector('#secondData4').innerText = `${countPilesInExec}` 
         SecondRow.querySelector('#secondData5').innerText = `${TotalNoPiles-countPilesInExec}`
         SecondRow.querySelector('#secondData6').innerText = `${((WorkingTime.reduce((a, b) => a + b, 0))).toFixed(2)}`
-        SecondRow.querySelector('#secondData7').innerText = `${(((WorkingTime.reduce((a, b) => a + b, 0))) / WorkingTime.length).toFixed(4)}`
-        SecondRow.querySelector('#secondData8').innerText = `${(filteredCO2Emissions.reduce((a, b) => a + b, 0) / filteredCO2Emissions.length).toFixed(2)}` //maybe needs to come from the machine data as drilling
+        SecondRow.querySelector('#secondData7').innerText = `${(((WorkingTime.reduce((a, b) => a + b, 0))) / countPilesInExec).toFixed(4)}`
+        SecondRow.querySelector('#secondData8').innerText = `${(filteredCO2Emissions.reduce((a, b) => a + b, 0) / countPilesInExec).toFixed(2)}` //maybe needs to come from the machine data as drilling
         SecondRow.querySelector('#secondData9').innerText = `${(filteredCO2Emissions.reduce((a, b) => a + b, 0)).toFixed(2)}`
-        SecondRow.querySelector('#secondData10').innerText = `${(filteredNOxEmissions.reduce((a, b) => a + b, 0) / filteredNOxEmissions.length).toFixed(2)}` //maybe needs to come from the machine data as drilling
+        SecondRow.querySelector('#secondData10').innerText = `${(filteredNOxEmissions.reduce((a, b) => a + b, 0) / countPilesInExec).toFixed(2)}` //maybe needs to come from the machine data as drilling
         SecondRow.querySelector('#secondData11').innerText = `${(filteredNOxEmissions.reduce((a, b) => a + b, 0)).toFixed(2)}`
-        SecondRow.querySelector('#secondData12').innerText = `${(filteredPMEmissions.reduce((a, b) => a + b, 0) / filteredPMEmissions.length).toFixed(2)}` //maybe needs to come from the machine data as drilling
+        SecondRow.querySelector('#secondData12').innerText = `${(filteredPMEmissions.reduce((a, b) => a + b, 0) / countPilesInExec).toFixed(2)}` //maybe needs to come from the machine data as drilling
         SecondRow.querySelector('#secondData13').innerText = `${(filteredPMEmissions.reduce((a, b) => a + b, 0)).toFixed(2)}`
 
         function ExceedThresholds() { //to return yes or no for execution started
-            const avgCO2perPile = (filteredCO2Emissions.reduce((a, b) => a + b, 0) / filteredCO2Emissions.length).toFixed(2)
-            const avgTimePerPile = (((WorkingTime.reduce((a, b) => a + b, 0))) / WorkingTime.length).toFixed(4)
-            if (avgCO2perPile > 10) {
+            const avgCO2perPile = (filteredCO2Emissions.reduce((a, b) => a + b, 0) / countPilesInExec).toFixed(2)
+            const avgTimePerPile = (((WorkingTime.reduce((a, b) => a + b, 0))) / countPilesInExec).toFixed(4)
+            if (avgCO2perPile > CO2perPilethreshold) {
                 return 'Excessive CO2 emission / pile'
             }
-            else if (avgTimePerPile > 0.4) {
+            else if (avgTimePerPile > TimePerPilethreshold) {
                 return 'Slow drilling'
             }
             else {
@@ -1196,16 +1202,16 @@ class ActivitiesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
 
         //data for the report
         const DrillingTime = ((WorkingTime.reduce((a, b) => a + b, 0))).toFixed(2)
-        const DrillingTimePerPile = (((WorkingTime.reduce((a, b) => a + b, 0))) / WorkingTime.length).toFixed(4)
-        const CO2TotalPerPile = (filteredCO2Emissions.reduce((a, b) => a + b, 0) / filteredCO2Emissions.length).toFixed(2) //maybe needs to come from the machine data as drilling
+        const DrillingTimePerPile = (((WorkingTime.reduce((a, b) => a + b, 0))) / countPilesInExec).toFixed(4)
+        const CO2TotalPerPile = (filteredCO2Emissions.reduce((a, b) => a + b, 0) / countPilesInExec).toFixed(2) //maybe needs to come from the machine data as drilling
         const CO2Total = (filteredCO2Emissions.reduce((a, b) => a + b, 0)).toFixed(2)
-        const NOxTotalPerPile = (filteredNOxEmissions.reduce((a, b) => a + b, 0) / filteredNOxEmissions.length).toFixed(2) //maybe needs to come from the machine data as drilling
+        const NOxTotalPerPile = (filteredNOxEmissions.reduce((a, b) => a + b, 0) / countPilesInExec).toFixed(2) //maybe needs to come from the machine data as drilling
         const NOxTotal = (filteredNOxEmissions.reduce((a, b) => a + b, 0)).toFixed(2)
-        const PMTotalPerPile = (filteredPMEmissions.reduce((a, b) => a + b, 0) / filteredPMEmissions.length).toFixed(2) //maybe needs to come from the machine data as drilling
+        const PMTotalPerPile = (filteredPMEmissions.reduce((a, b) => a + b, 0) / countPilesInExec).toFixed(2) //maybe needs to come from the machine data as drilling
         const PMTotal = (filteredPMEmissions.reduce((a, b) => a + b, 0)).toFixed(2)
 
 
-        button1.innerHTML = `<a href="mailto:destinatary@mail.com?subject=Report of drilling activities on site Project XXX - Date ${new Date().toDateString()} &body=Current execution status is ${countPilesfinished} piles executed, ${16 - countPilesfinished} in execution and 134 to be executed. %0D%0ATotal drilling time so far is ${DrillingTime} hours, with an average drilling time of ${DrillingTimePerPile} hours per pile. %0D%0ATotal emissions produced in drilling activities are ${CO2Total} kilograms of CO2, ${NOxTotal} grams of NOx and ${PMTotal} grams of PM. %0D%0AAverage Emission rates are ${CO2TotalPerPile} kgs of CO2 per pile; ${PMTotalPerPile} grams of PM per pile; and ${NOxTotalPerPile} grams of NOx per pile" style="text-decoration:none; color:black">Send report</a>`
+        button1.innerHTML = `<a href="mailto:destinatary@mail.com?subject=Report of drilling activities on site Project XXX - Date ${new Date().toDateString()} &body=Current execution status is ${countPilesfinished} piles executed, ${countPilesInExec} in execution and ${TotalNoPiles-countPilesInExec} to be executed. %0D%0ATotal drilling time so far is ${DrillingTime} hours, with an average drilling time of ${DrillingTimePerPile} hours per pile. %0D%0ATotal emissions produced in drilling activities are ${CO2Total} kilograms of CO2, ${NOxTotal} grams of NOx and ${PMTotal} grams of PM. %0D%0AAverage Emission rates are ${CO2TotalPerPile} kgs of CO2 per pile; ${PMTotalPerPile} grams of PM per pile; and ${NOxTotalPerPile} grams of NOx per pile" style="text-decoration:none; color:black">Send report</a>`
 
         button1.style.borderRadius = '4px'
         button1.style.cursor = 'pointer'

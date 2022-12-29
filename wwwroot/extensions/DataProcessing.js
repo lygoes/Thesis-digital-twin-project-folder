@@ -1,6 +1,7 @@
 
 import { BaseExtension } from './BaseExtension.js';
 import myJsondata from './test1-Preprocessed-Data-Minute.json' assert {type: 'json'};
+
 // import myJsondata from './test2-DataFiltered-Minute.json' assert {type: 'json'};
 // import myJsondata from './testBauerData-Minute.json' assert {type: 'json'};
 
@@ -23,7 +24,8 @@ export function getMachineInfo () {
 const Incx = 13.4042; //needs to be in ft to work in the viewer - 5 meters equals 16.4 meters
 const Incy = 13.4042; //5 METERS IS 16,4 FEET
 const Incz = Math.hypot(Incx, Incy); //this is wrong, doesn't need hypot, fix itt
-
+//Machine Radius
+const MachineSphereRadius = 16.4;
 
 //creates array for storing Bbox of all piles
 const Bboxespiles = [];
@@ -128,7 +130,7 @@ export function getDataforPiles() {
             const bbox_min = new THREE.Vector3(i.Lmv.x - Incx, i.Lmv.y - Incy, i.Lmv.z - Incz)
             const bbox_max = new THREE.Vector3(i.Lmv.x + Incx, i.Lmv.y + Incy, i.Lmv.z + Incz)
             i.bbox = new THREE.Box3 (bbox_min, bbox_max);
-            i.sphere = new THREE.Sphere(i.Lmv, 16.4)
+            i.sphere = new THREE.Sphere(i.Lmv, MachineSphereRadius)
             MachineBboxData.push(i)
 
         });
