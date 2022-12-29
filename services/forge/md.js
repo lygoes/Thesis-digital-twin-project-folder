@@ -4,7 +4,7 @@ const { getInternalToken } = require('./auth.js');
 async function translateObject(urn, rootFilename) {
     const job = {
         input: { urn },
-        output: { formats: [{ type: 'svf', views: ['2d', '3d'], advanced: {generateMasterViews: true} }] } //add 'advanced' for generating rooms info
+        output: { formats: [{ type: 'svf', views: ['2d', '3d'], advanced: {generateMasterViews: true} }] }      //add 'advanced' for generating rooms info
     };
     if (rootFilename) {
         job.input.compressedUrn = true;

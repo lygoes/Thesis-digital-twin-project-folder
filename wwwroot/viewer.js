@@ -1,15 +1,15 @@
 /// import * as Autodesk from "@types/forge-viewer";
 import './extensions/DataProcessing.js';
-import './extensions/LoggerExtension.js';
-import './extensions/SummaryExtension.js';
-import './extensions/SiteSensorsList.js';  
 import './extensions/SpritesExtension.js';
 import './extensions/ActivitiesOverview.js';
-import './extensions/GeoLocationExtension.js';
+import './extensions/MachineInfoPanel.js'; 
+import './extensions/AppearObjects.js';
+// import './extensions/LoggerExtension.js';
+// import './extensions/SummaryExtension.js';
+// import './extensions/SiteSensorsList.js';  
+// import './extensions/GeoLocationExtension.js';
 // import './extensions/TestHeatmapwithAirLab.js'; // //needs to be added to device list panel
 // import './extensions/TestHeatmapForEarthwork.js'; //needs to be added to piles list panel
-import './extensions/AppearObjects.js';
-import './extensions/MachineInfoPanel.js'; 
 
 
 
@@ -38,18 +38,16 @@ export function initViewer(container) {
                 extensions: [
                     'DataProcessing',
                     'Autodesk.DocumentBrowser',
-                    'LoggerExtension',
-                    'SummaryExtension',
-                    'SiteSensorsList',
                     'SpritesExtension',
-                    'GisToolExtension',
-                    // 'TestHeatmapwithAirLab', //needs to be added to device list panel
                     'ActivitiesOverview',
-                    // 'TestHeatmapForEarthwork', //needs to be added to piles list panel
                     'AppearObjects',
                     'MachineInfoPanel',
-                   
-                    
+                    // 'LoggerExtension',
+                    // 'SummaryExtension',
+                    // 'SiteSensorsList',
+                    // 'GisToolExtension',
+                    // 'TestHeatmapwithAirLab', //needs to be added to device list panel
+                    // 'TestHeatmapForEarthwork', //needs to be added to piles list panel
                 ]
             };
             const viewer = new Autodesk.Viewing.GuiViewer3D(container, config);

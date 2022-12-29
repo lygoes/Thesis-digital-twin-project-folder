@@ -40,6 +40,11 @@ setTimeout(() => {
     // console.log('timestamps', timestamps)
 }, 10000)
 
+//thresholds for machine data
+const MachineCO2rateThreshold = 30;  //kilograms per hour
+const MachinePMrateThreshold = 5; //grams per hour
+const MachineNOxrateThreshold = 500;  //grams per hour
+const IdlingProportionThreshold = 0.4; //idling time divided by total time
 
 class MachineInfo extends BaseExtension {
     constructor(viewer, options) {
@@ -311,20 +316,21 @@ class MachinesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
         secondRowMachineList.querySelector('#data15').innerText = ((machineInfo['TotalNOx']) / (machineInfo['OperationTime'] / 60)).toFixed(2)
         secondRowMachineList.querySelector('#data16').innerText = (machineInfo['TotalPM']).toFixed(2)
         secondRowMachineList.querySelector('#data17').innerText = ((machineInfo['TotalPM']) / (machineInfo['OperationTime'] / 60)).toFixed(2)
+       
         //To appear message in the performance field if it exceeds certain thresholds
         function ExceedThresholds() {
             const avgCO2rate = (machineInfo['TotalCO2'] / 1000) / (machineInfo['OperationTime'] / 60)
             const IdlingProportion = machineInfo['IdlingTime'] / machineInfo['OperationTime']
-            if (avgCO2rate > 10) {
+            if (avgCO2rate > MachineCO2rateThreshold) {
                 return 'Excessive CO2 emissions'
             }
-            else if (IdlingProportion > 0.4) {
+            else if (IdlingProportion > IdlingProportionThreshold) {
                 return 'Excessive Idling'
             }
             else {
                 return 'OK'
             }
-        }
+        } 
         secondRowMachineList.querySelector('#data18').innerText = ExceedThresholds()
 
         //to turn the message in the performance field red or green
