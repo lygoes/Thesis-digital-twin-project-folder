@@ -99,7 +99,7 @@ class MachineInfo extends BaseExtension {
 
         };
         //Creates data panels
-        this._PileDriverChartPanel = new PileDriverDataPanel(this, 'Piledriver-data-panel', 'Datachart Piledriver', { x: 10, y: 10, chartType: 'line' });
+        this._PileDriverChartPanel = new PileDriverDataPanel(this, 'Piledriver-data-panel', 'Datachart Drilling rig', { x: 10, y: 10, chartType: 'line' });
         this._ExcavatorChartPanel = new ExcavatorDataPanel(this, 'Excavator-data-panel', 'Datachart Excavator', { x: 10, y: 10, chartType: 'line' });
 
         //For updating charts according to switch on dropdown menu
@@ -674,32 +674,32 @@ class PileDriverDataPanel extends Autodesk.Viewing.UI.DockingPanel {
         return new Chart(this.canvas.getContext('2d'), {
             type: 'line',
             data: {
-                labels: ['06/10/22 14:50', '06/10/22 14:51', '06/10/22 14:52', '06/10/22 14:53', '06/10/22 14:54', '06/10/22 14:55'], //get timestamps
+                labels: timestamps,
                 datasets: [{
-                    data: [300, 200, 500, 600, 400, 100],
+                    data: AvgEnginePowers,
                     label: "Avg. Power ", 
                     borderColor: "#3e95cd",
                     backgroundColor: "#3e95cd",
                     fill: false
                 }, {
-                    data: [200, 100, 400, 400, 500, 100],
+                    data: minEnginePowers,
                     label: "Min. Power",
                     borderColor: "#8e5ea2",
                     backgroundColor: "#8e5ea2",
                     fill: false
                 }, {
-                    data: [400, 300, 600, 800, 700, 300],
+                    data: maxEnginePowers,
                     label: "Max. Power",
                     borderColor: "#FFA500",
                     backgroundColor: "#FFA500",
                     fill: false
                 }
-                ]
+                ] 
             },
             options: {
                 title: {
                     display: true,
-                    text: 'Data Piledriver'
+                    text: 'Data Pile driver'
                 }
             }
         });

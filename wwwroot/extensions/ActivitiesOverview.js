@@ -362,7 +362,6 @@ class ActivitiesOverview extends BaseExtension {
 
     disableHeatmap() {
         this._extension.removeSurfaceShading(this.viewer.model);
-
     }
 
     async loadHeatmapPM() {
