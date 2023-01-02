@@ -2,7 +2,7 @@
 import './extensions/DataProcessing.js';
 import './extensions/SpritesExtension.js';
 import './extensions/ActivitiesOverview.js';
-import './extensions/MachineInfoPanel.js'; 
+import './extensions/MachinesOverview.js'; 
 import './extensions/AppearObjects.js';
 // import './extensions/LoggerExtension.js';
 // import './extensions/SummaryExtension.js';
@@ -41,7 +41,7 @@ export function initViewer(container) {
                     'SpritesExtension',
                     'ActivitiesOverview',
                     'AppearObjects',
-                    'MachineInfoPanel',
+                    'MachinesOverview',
                     // 'LoggerExtension',
                     // 'SummaryExtension',
                     // 'SiteSensorsList',
