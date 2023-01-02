@@ -2,8 +2,7 @@
 import { BaseExtension } from './BaseExtension.js';
 import myJsondata from './test1-Preprocessed-Data-Minute.json' assert {type: 'json'};
 
-// import myJsondata from './test2-DataFiltered-Minute.json' assert {type: 'json'};
-// import myJsondata from './testBauerData-Minute.json' assert {type: 'json'};
+// import myJsondata from './PEMS-data-Minute.json' assert {type: 'json'};
 
 
 //for storing data with position converted and exporting the data through a function

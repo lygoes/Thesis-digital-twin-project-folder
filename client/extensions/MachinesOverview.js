@@ -46,7 +46,7 @@ const MachinePMrateThreshold = 5; //grams per hour
 const MachineNOxrateThreshold = 500;  //grams per hour
 const IdlingProportionThreshold = 0.4; //idling time divided by total time
 
-class MachineInfo extends BaseExtension {
+class MachinesOverview extends BaseExtension {
     constructor(viewer, options) {
         super(viewer, options);
         this._MachineOverviewPanel = null;
@@ -490,7 +490,7 @@ class MachinesOverviewPanel extends Autodesk.Viewing.UI.PropertyPanel {
 }
 
 
-Autodesk.Viewing.theExtensionManager.registerExtension('MachineInfoPanel', MachineInfo);
+Autodesk.Viewing.theExtensionManager.registerExtension('MachinesOverview', MachinesOverview);
 
 //Creates panel for forecasting machine data
 class MachineSimulationPanel extends Autodesk.Viewing.UI.PropertyPanel {
